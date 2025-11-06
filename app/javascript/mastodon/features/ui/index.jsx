@@ -65,7 +65,7 @@ import {
   Blocks,
   DomainBlocks,
   Mutes,
-  PinnedStatuses,
+  PinnedTimeline,
   Directory,
   OnboardingProfile,
   OnboardingFollows,
@@ -192,7 +192,6 @@ class SwitchingColumnsArea extends PureComponent {
             <WrappedRoute path='/favourites' component={FavouritedStatuses} content={children} />
 
             <WrappedRoute path='/bookmarks' component={BookmarkedStatuses} content={children} />
-            <WrappedRoute path='/pinned' component={PinnedStatuses} content={children} />
 
             <WrappedRoute path={['/start', '/start/profile']} exact component={OnboardingProfile} content={children} />
             <WrappedRoute path='/start/follows' component={OnboardingFollows} content={children} />
@@ -202,7 +201,7 @@ class SwitchingColumnsArea extends PureComponent {
             <WrappedRoute path={['/publish', '/statuses/new']} component={Compose} content={children} />
 
             <WrappedRoute path={['/@:acct', '/accounts/:id']} exact component={AccountTimeline} content={children} />
-            <WrappedRoute path={['/@:acct/featured', '/accounts/:id/featured']} component={AccountFeatured} content={children} />
+            <WrappedRoute path={['/@:acct/pinned', '/accounts/:id/pinned']} component={PinnedTimeline} content={children} />
             <WrappedRoute path='/@:acct/tagged/:tagged?' exact component={AccountTimeline} content={children} />
             <WrappedRoute path={['/@:acct/with_replies', '/accounts/:id/with_replies']} component={AccountTimeline} content={children} componentParams={{ withReplies: true }} />
             <WrappedRoute path={['/accounts/:id/followers', '/users/:acct/followers', '/@:acct/followers']} component={Followers} content={children} />

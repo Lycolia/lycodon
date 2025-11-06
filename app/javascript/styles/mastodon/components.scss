@@ -3,6 +3,19 @@
 @use 'functions' as *;
 @use 'mixins' as *;
 
+div[aria-label$='shillest.net'] img[alt^=':stamp'] {
+  height: auto !important;
+  width: auto !important;
+  max-height: 110px !important;
+  max-width: 110px !important;
+  object-fit: contain !important;
+  vertical-align: bottom !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 .app-body {
   -webkit-overflow-scrolling: touch;
   -ms-overflow-style: -ms-autohiding-scrollbar;
@@ -1389,7 +1402,7 @@
   }
 }
 
-.announcements__item__content {
+.announcements__content {
   overflow-wrap: break-word;
   overflow-y: auto;
 
@@ -8986,10 +8999,21 @@ noscript {
 }
 
 .announcements {
-  background: lighten($ui-base-color, 8%);
-  font-size: 13px;
-  display: flex;
-  align-items: flex-end;
+  width: calc(100% - 124px);
+  flex: 0 0 auto;
+  position: relative;
+  overflow: hidden;
+
+  @media screen and (max-width: (124px + 300px)) {
+    width: 100%;
+  }
+
+  &__root {
+    background: lighten($ui-base-color, 8%);
+    font-size: 13px;
+    display: flex;
+    align-items: flex-end;
+  }
 
   &__mastodon {
     width: 124px;
@@ -9000,19 +9024,16 @@ noscript {
     }
   }
 
-  &__container {
-    width: calc(100% - 124px);
-    flex: 0 0 auto;
-    position: relative;
-
-    @media screen and (max-width: (124px + 300px)) {
-      width: 100%;
-    }
+  &__slides {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: start;
   }
 
-  &__item {
+  &__slide {
     box-sizing: border-box;
     width: 100%;
+    flex: 0 0 100%;
     padding: 15px;
     position: relative;
     font-size: 15px;
@@ -9021,26 +9042,25 @@ noscript {
     font-weight: 400;
     max-height: 50vh;
     overflow: hidden;
-    display: flex;
     flex-direction: column;
+  }
 
-    &__range {
-      display: block;
-      font-weight: 500;
-      margin-bottom: 10px;
-      padding-inline-end: 18px;
-    }
+  &__range {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 10px;
+    padding-inline-end: 18px;
+  }
 
-    &__unread {
-      position: absolute;
-      top: 19px;
-      inset-inline-end: 19px;
-      display: block;
-      background: $highlight-text-color;
-      border-radius: 50%;
-      width: 0.625rem;
-      height: 0.625rem;
-    }
+  &__unread {
+    position: absolute;
+    top: 19px;
+    inset-inline-end: 19px;
+    display: block;
+    background: $highlight-text-color;
+    border-radius: 50%;
+    width: 0.625rem;
+    height: 0.625rem;
   }
 
   &__pagination {
@@ -9051,6 +9071,7 @@ noscript {
     inset-inline-end: 0;
     display: flex;
     align-items: center;
+    z-index: 1;
   }
 }
 
@@ -11620,7 +11641,7 @@ noscript {
   }
 
   &__header {
-    padding: 8px 16px;
+    padding: 12px 6px 0 16px;
     color: $darker-text-color;
     inset-inline-end: 0;
     display: flex;
@@ -11630,7 +11651,7 @@ noscript {
 
   &__title {
     flex-grow: 1;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 500;
     text-transform: uppercase;
     display: flex;
@@ -11641,5 +11662,11 @@ noscript {
       width: 16px;
       height: 16px;
     }
+  }
+
+  &__pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 }

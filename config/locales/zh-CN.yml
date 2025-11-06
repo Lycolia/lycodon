@@ -840,7 +840,7 @@ zh-CN:
         modes:
           authenticated: 仅已登录用户
           disabled: 需要特定的用户角色
-          public: 每个人
+          public: 所有人
       landing_page:
         values:
           about: 关于

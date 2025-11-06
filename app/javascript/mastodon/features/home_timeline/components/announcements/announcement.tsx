@@ -17,12 +17,12 @@ export interface IAnnouncement extends ApiAnnouncementJSON {
 
 interface AnnouncementProps {
   announcement: IAnnouncement;
-  selected: boolean;
+  active?: boolean;
 }
 
 export const Announcement: FC<AnnouncementProps> = ({
   announcement,
-  selected,
+  active,
 }) => {
   const { read, id } = announcement;
 
@@ -37,14 +37,15 @@ export const Announcement: FC<AnnouncementProps> = ({
   // But visually show the announcement as read only when it goes out of view.
   const [unread, setUnread] = useState(!read);
   useEffect(() => {
-    if (!selected && unread !== !read) {
-      setUnread(!read);
+    // Only update `unread` marker once the announcement is out of view
+    if (!active && unread !== !announcement.read) {
+      setUnread(!announcement.read);
     }
-  }, [selected, unread, read]);
+  }, [announcement.read, active, unread]);
 
   return (
-    <AnimateEmojiProvider className='announcements__item'>
-      <strong className='announcements__item__range'>
+    <AnimateEmojiProvider>
+      <strong className='announcements__range'>
         <FormattedMessage
           id='announcement.announcement'
           defaultMessage='Announcement'
@@ -56,14 +57,14 @@ export const Announcement: FC<AnnouncementProps> = ({
       </strong>
 
       <EmojiHTML
-        className='announcements__item__content translate'
+        className='announcements__content translate'
         htmlString={announcement.contentHtml}
         extraEmojis={announcement.emojis}
       />
 
       <ReactionsBar reactions={announcement.reactions} id={announcement.id} />
 
-      {unread && <span className='announcements__item__unread' />}
+      {unread && <span className='announcements__unread' />}
     </AnimateEmojiProvider>
   );
 };

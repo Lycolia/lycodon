@@ -1141,9 +1141,7 @@ div[aria-label$='shillest.net'] img[alt^=':stamp'] {
   font-size: inherit;
   vertical-align: middle;
   object-fit: contain;
-  margin: -0.2ex 0.15em 0.2ex;
-  width: 16px;
-  height: 16px;
+  height: 1em;
 
   img {
     width: auto;
@@ -1184,9 +1182,7 @@ div[aria-label$='shillest.net'] img[alt^=':stamp'] {
   }
 
   .emojione {
-    width: 20px;
-    height: 20px;
-    margin: -3px 0 0;
+    height: 2em;
   }
 
   p {
@@ -1834,9 +1830,7 @@ div[aria-label$='shillest.net'] img[alt^=':stamp'] {
     line-height: 24px;
 
     .emojione {
-      width: 24px;
-      height: 24px;
-      margin: -1px 0 0;
+      height: 2em;
     }
   }
 

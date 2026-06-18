@@ -74,6 +74,14 @@ module Mastodon
       ENV.fetch('SOURCE_COMMIT', nil)
     end
 
+    def custom_version
+      custom_configuration[:version]
+    end
+
+    def custom_source_url
+      custom_configuration[:source_url]
+    end
+
     def user_agent
       @user_agent ||= "Mastodon/#{Version} (#{HTTP::Request::USER_AGENT}; +http#{'s' if Rails.configuration.x.use_https}://#{Rails.configuration.x.web_domain}/)"
     end
@@ -84,6 +92,10 @@ module Mastodon
 
     def source_configuration
       mastodon_configuration.source
+    end
+
+    def custom_configuration
+      mastodon_configuration.custom
     end
 
     def mastodon_configuration

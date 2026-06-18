@@ -6,6 +6,8 @@ import {
   domain,
   version,
   source_url,
+  customVersion,
+  customSourceUrl,
   statusPageUrl,
   profile_directory as canProfileDirectory,
   termsOfServiceEnabled,
@@ -106,15 +108,18 @@ export const LinkFooter: React.FC<{
               />
             </Link>
           </li>
-          <li>
-            <a href={source_url} rel='noopener' target='_blank'>
-              <FormattedMessage
-                id='footer.source_code'
-                defaultMessage='View source code'
-              />
-            </a>
-          </li>
-          <li className={classes.version}>v{version}</li>
+          <li className={classes.version}><a href={source_url} rel='noopener' target='_blank'>v{version}</a></li>
+          {(customVersion ?? customSourceUrl) && (
+            <li className={classes.version}>
+              {customSourceUrl ? (
+                <a href={customSourceUrl} rel='noopener' target='_blank'>
+                  {customVersion ? `${customVersion}` : customSourceUrl}
+                </a>
+              ) : (
+                `${customVersion ?? ''}`
+              )}
+            </li>
+          )}
         </ul>
       </section>
     </footer>

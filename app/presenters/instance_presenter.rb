@@ -2,6 +2,7 @@
 
 class InstancePresenter < ActiveModelSerializers::Model
   attributes :domain, :title, :version, :source_url,
+             :custom_version, :custom_source_url,
              :description, :languages, :rules, :contact
 
   class ContactPresenter < ActiveModelSerializers::Model
@@ -72,6 +73,14 @@ class InstancePresenter < ActiveModelSerializers::Model
 
   def source_url
     Mastodon::Version.source_url
+  end
+
+  def custom_version
+    Mastodon::Version.custom_version
+  end
+
+  def custom_source_url
+    Mastodon::Version.custom_source_url
   end
 
   def thumbnail

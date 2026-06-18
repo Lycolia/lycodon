@@ -34,7 +34,6 @@ import { initMuteModal } from 'mastodon/actions/mutes';
 import { initReport } from 'mastodon/actions/reports';
 import { Avatar } from 'mastodon/components/avatar';
 import { Badge, AutomatedBadge, GroupBadge } from 'mastodon/components/badge';
-import { CopyIconButton } from 'mastodon/components/copy_icon_button';
 import {
   FollowersCounter,
   FollowingCounter,
@@ -46,9 +45,6 @@ import { FormattedDateWrapper } from 'mastodon/components/formatted_date';
 import { Icon } from 'mastodon/components/icon';
 import { IconButton } from 'mastodon/components/icon_button';
 import { ShortNumber } from 'mastodon/components/short_number';
-import { AccountNote } from 'mastodon/features/account/components/account_note';
-import { DomainPill } from 'mastodon/features/account/components/domain_pill';
-import FollowRequestNoteContainer from 'mastodon/features/account/containers/follow_request_note_container';
 import { useIdentity } from 'mastodon/identity_context';
 import { autoPlayGif, me, domain as localDomain } from 'mastodon/initial_state';
 import type { Account } from 'mastodon/models/account';
@@ -60,9 +56,6 @@ import {
 import { getAccountHidden } from 'mastodon/selectors/accounts';
 import { useAppSelector, useAppDispatch } from 'mastodon/store';
 
-import { FamiliarFollowers } from './familiar_followers';
-import { MemorialNote } from './memorial_note';
-import { MovedNote } from './moved_note';
 
 const messages = defineMessages({
   unblock: { id: 'account.unblock', defaultMessage: 'Unblock @{name}' },

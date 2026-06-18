@@ -29,19 +29,23 @@ export const Announcement: FC<AnnouncementProps> = ({
   // Dismiss announcement when it becomes active.
   const dispatch = useAppDispatch();
   useEffect(() => {
-    if (selected && !read) {
+    if (active && !read) {
       dispatch(dismissAnnouncement(id));
     }
-  }, [selected, id, dispatch, read]);
+  }, [active, id, dispatch, read]);
 
   // But visually show the announcement as read only when it goes out of view.
-  const [unread, setUnread] = useState(!read);
-  useEffect(() => {
-    // Only update `unread` marker once the announcement is out of view
-    if (!active && unread !== !announcement.read) {
-      setUnread(!announcement.read);
+  const [isVisuallyRead, setIsVisuallyRead] = useState(read);
+  const [previousActive, setPreviousActive] = useState(active);
+  if (active !== previousActive) {
+    setPreviousActive(active);
+
+    // This marks the announcement as read in the UI only after it
+    // went from active to inactive.
+    if (!active && isVisuallyRead !== read) {
+      setIsVisuallyRead(read);
     }
-  }, [announcement.read, active, unread]);
+  }
 
   return (
     <AnimateEmojiProvider>
@@ -64,7 +68,7 @@ export const Announcement: FC<AnnouncementProps> = ({
 
       <ReactionsBar reactions={announcement.reactions} id={announcement.id} />
 
-      {unread && <span className='announcements__unread' />}
+      {!isVisuallyRead && <span className='announcements__unread' />}
     </AnimateEmojiProvider>
   );
 };

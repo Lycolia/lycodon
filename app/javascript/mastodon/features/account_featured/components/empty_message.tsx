@@ -1,24 +1,15 @@
-import { useCallback } from 'react';
-
 import { FormattedMessage } from 'react-intl';
 
-import { Link } from 'react-router-dom';
+import { useParams } from 'react-router';
 
-import { openModal } from '@/mastodon/actions/modal';
-import { Button } from '@/mastodon/components/button';
-import { DisplayName } from '@/mastodon/components/display_name';
-import { EmptyState } from '@/mastodon/components/empty_state';
-import { LimitedAccountHint } from '@/mastodon/components/limited_account_hint';
-import { useAccount } from '@/mastodon/hooks/useAccount';
-import { useCurrentAccountId } from '@/mastodon/hooks/useAccountId';
-import { useAppDispatch } from '@/mastodon/store';
+import { LimitedAccountHint } from 'mastodon/features/account_timeline/components/limited_account_hint';
+import { me } from 'mastodon/initial_state';
 
 interface EmptyMessageProps {
   suspended: boolean;
   hidden: boolean;
   blockedBy: boolean;
   accountId?: string;
-  withoutAddCollectionButton?: boolean;
 }
 
 export const EmptyMessage: React.FC<EmptyMessageProps> = ({
@@ -26,64 +17,23 @@ export const EmptyMessage: React.FC<EmptyMessageProps> = ({
   suspended,
   hidden,
   blockedBy,
-  withoutAddCollectionButton,
 }) => {
-  const me = useCurrentAccountId();
-  const account = useAccount(accountId);
-
-  const dispatch = useAppDispatch();
-
-  const confirmHideFeaturedTab = useCallback(() => {
-    void dispatch(
-      openModal({
-        modalType: 'ACCOUNT_HIDE_FEATURED_TAB',
-        modalProps: {},
-      }),
-    );
-  }, [dispatch]);
-
+  const { acct } = useParams<{ acct?: string }>();
   if (!accountId) {
     return null;
   }
 
-  let title: React.ReactNode = null;
   let message: React.ReactNode = null;
 
   if (me === accountId) {
-    // Return only here to insert the "Create a collection" button as the action for the empty state.
-    return (
-      <EmptyState
-        title={
-          <FormattedMessage
-            id='empty_column.account_featured_self.showcase_accounts'
-            defaultMessage='Showcase your favorite accounts'
-          />
-        }
-        message={
-          <FormattedMessage
-            id='empty_column.account_featured_self.showcase_accounts_desc'
-            defaultMessage='Collections are curated lists of accounts to help others discover more of the Fediverse.'
-          />
-        }
-      >
-        {!withoutAddCollectionButton && (
-          <Link to='/collections/new' className='button'>
-            <FormattedMessage
-              id='empty_column.account_featured_self.no_collections_button'
-              defaultMessage='Create a collection'
-            />
-          </Link>
-        )}
-        <Button secondary onClick={confirmHideFeaturedTab}>
-          <FormattedMessage
-            id='empty_column.account_featured_self.no_collections_hide_tab'
-            defaultMessage='Hide this tab instead'
-          />
-        </Button>
-      </EmptyState>
+    message = (
+      <FormattedMessage
+        id='empty_column.account_featured.me'
+        defaultMessage='You have not featured anything yet. Did you know that you can feature your hashtags you use the most, and even your friend’s accounts on your profile?'
+      />
     );
   } else if (suspended) {
-    title = (
+    message = (
       <FormattedMessage
         id='empty_column.account_suspended'
         defaultMessage='Account suspended'
@@ -92,30 +42,28 @@ export const EmptyMessage: React.FC<EmptyMessageProps> = ({
   } else if (hidden) {
     message = <LimitedAccountHint accountId={accountId} />;
   } else if (blockedBy) {
-    title = (
+    message = (
       <FormattedMessage
         id='empty_column.account_unavailable'
         defaultMessage='Profile unavailable'
       />
     );
+  } else if (acct) {
+    message = (
+      <FormattedMessage
+        id='empty_column.account_featured.other'
+        defaultMessage='{acct} has not featured anything yet. Did you know that you can feature your hashtags you use the most, and even your friend’s accounts on your profile?'
+        values={{ acct }}
+      />
+    );
   } else {
-    if (account) {
-      title = (
-        <FormattedMessage
-          id='empty_column.account_featured.other'
-          defaultMessage='{acct} has not featured anything yet.'
-          values={{ acct: <DisplayName variant='simple' account={account} /> }}
-        />
-      );
-    } else {
-      title = (
-        <FormattedMessage
-          id='empty_column.account_featured_unknown.other'
-          defaultMessage='This account has not featured anything yet.'
-        />
-      );
-    }
+    message = (
+      <FormattedMessage
+        id='empty_column.account_featured_other.unknown'
+        defaultMessage='This account has not featured anything yet.'
+      />
+    );
   }
 
-  return <EmptyState title={title} message={message} />;
+  return <div className='empty-column-indicator'>{message}</div>;
 };

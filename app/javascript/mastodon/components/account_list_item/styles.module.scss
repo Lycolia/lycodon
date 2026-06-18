@@ -34,6 +34,27 @@
   align-self: start;
 }
 
+.statsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.moreButton {
+  border: 1px solid var(--background-border-color);
+  border-radius: 4px;
+  padding: 4px;
+  color: #606085;
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: #717198;
+    background-color: #60608526
+  }
+}
+
 .verifiedBadge {
   align-self: end;
 }

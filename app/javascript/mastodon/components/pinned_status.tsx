@@ -56,7 +56,6 @@ export const PinnedStatus: React.FC<{
             </h4>
           </div>
           <StatusContainer
-            // @ts-expect-error inferred props are wrong
             id={statusId}
             contextType='account'
             withCounters

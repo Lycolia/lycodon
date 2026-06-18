@@ -231,6 +231,104 @@
   border-color: var(--color-border-error-soft);
 }
 
+.account-role {
+  display: inline-flex;
+  padding: 4px;
+  padding-inline-end: 8px;
+  border: 1px solid $highlight-text-color;
+  color: $highlight-text-color;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  line-height: 16px;
+  gap: 4px;
+  border-radius: 6px;
+  align-items: center;
+
+  svg {
+    width: auto;
+    height: 15px;
+    opacity: 0.85;
+    fill: currentColor;
+  }
+
+  &__domain {
+    font-weight: 400;
+    opacity: 0.75;
+    letter-spacing: 0;
+  }
+}
+
+.account__header__fields {
+  max-width: 100vw;
+  padding: 0;
+  margin: 15px -15px -15px;
+  border: 0 none;
+  border-top: 1px solid color.adjust($ui-base-color, $lightness: 12%);
+  border-bottom: 1px solid color.adjust($ui-base-color, $lightness: 12%);
+  font-size: 14px;
+  line-height: 20px;
+
+  dl {
+    display: flex;
+    border-bottom: 1px solid color.adjust($ui-base-color, $lightness: 12%);
+  }
+
+  dt,
+  dd {
+    box-sizing: border-box;
+    padding: 14px;
+    text-align: center;
+    max-height: 48px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  dt {
+    font-weight: 500;
+    width: 120px;
+    flex: 0 0 auto;
+    color: $secondary-text-color;
+    background: rgba(color.adjust($ui-base-color, $lightness: -8%), 0.5);
+  }
+
+  dd {
+    flex: 1 1 auto;
+    color: $darker-text-color;
+  }
+
+  a {
+    color: $highlight-text-color;
+    text-decoration: none;
+
+    &:hover,
+    &:focus,
+    &:active {
+      text-decoration: underline;
+    }
+  }
+
+  .verified {
+    border: 1px solid color.change($valid-value-color, $alpha: 0.5);
+    background: color.change($valid-value-color, $alpha: 0.25);
+
+    a {
+      color: $valid-value-color;
+      font-weight: 500;
+    }
+
+    &__mark {
+      color: $valid-value-color;
+    }
+  }
+
+  dl:last-child {
+    border-bottom: 0;
+  }
+}
+
+
 .directory__tag .trends__item__current {
   width: auto;
 }

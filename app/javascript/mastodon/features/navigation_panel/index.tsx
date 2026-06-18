@@ -363,16 +363,6 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
             <li>
               <ColumnLink
                 transparent
-                to={`/@${account?.acct}/collections`}
-                icon='collections'
-                iconComponent={CollectionsIcon}
-                activeIconComponent={CollectionsActiveIcon}
-                text={intl.formatMessage(messages.collections)}
-              />
-            </li>
-            <li>
-              <ColumnLink
-                transparent
                 to='/conversations'
                 icon='at'
                 iconComponent={AlternateEmailIcon}

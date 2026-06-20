@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 
 import ImmutablePropTypes from 'react-immutable-proptypes';
 
-import { Toggle } from '@/mastodon/components/form_fields/toggle_field';
+import Toggle from 'react-toggle';
 
 export default class SettingToggle extends PureComponent {
 
@@ -27,7 +27,7 @@ export default class SettingToggle extends PureComponent {
 
     return (
       <div className='setting-toggle'>
-        <Toggle disabled={disabled} id={id} checked={settings.getIn(settingPath, defaultValue)} onChange={this.onChange} onKeyDown={this.onKeyDown} size={16} />
+        <Toggle disabled={disabled} id={id} checked={settings.getIn(settingPath, defaultValue)} onChange={this.onChange} onKeyDown={this.onKeyDown} />
         <label htmlFor={id} className='setting-toggle__label'>{label}</label>
       </div>
     );

@@ -3,8 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe REST::SuggestionSerializer do
-  let(:serialization) { serialized_record_json(record, described_class, options: { scope: current_user, scope_name: :current_user }) }
-  let(:current_user) { Fabricate(:user) }
+  let(:serialization) { serialized_record_json(record, described_class) }
   let(:record) do
     AccountSuggestions::Suggestion.new(
       account: account,

@@ -5,10 +5,8 @@ import classNames from 'classnames';
 
 import { LoadingIndicator } from 'mastodon/components/loading_indicator';
 
-interface BaseProps extends Omit<
-  React.ButtonHTMLAttributes<HTMLButtonElement>,
-  'children'
-> {
+interface BaseProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   block?: boolean;
   secondary?: boolean;
   plain?: boolean;
@@ -80,7 +78,6 @@ export const Button: React.FC<Props> = ({
       aria-live={loading !== undefined ? 'polite' : undefined}
       onClick={handleClick}
       title={title}
-      // eslint-disable-next-line react/button-has-type -- set correctly via TS
       type={type}
       {...props}
     >

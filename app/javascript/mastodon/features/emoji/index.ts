@@ -1,133 +1,88 @@
 import { initialState } from '@/mastodon/initial_state';
 
 import { toSupportedLocale } from './locale';
-import type { EmojiWorkerMessage } from './types';
+import type { LocaleOrCustom } from './types';
 import { emojiLogger } from './utils';
+// eslint-disable-next-line import/default -- Importing via worker loader.
+import EmojiWorker from './worker?worker&inline';
 
 const userLocale = toSupportedLocale(initialState?.meta.locale ?? 'en');
 
 let worker: Worker | null = null;
 
 const log = emojiLogger('index');
-const workerLog = emojiLogger('worker');
 
-// This is too short, but better to fallback quickly than wait.
-const WORKER_TIMEOUT = 2_000;
+const WORKER_TIMEOUT = 1_000; // 1 second
 
-export async function initializeEmoji() {
+export function initializeEmoji() {
   log('initializing emojis');
-
-  // Create a temp worker, and assign it to the module-level worker once we know it's ready.
-  let tempWorker: Worker | null = null;
   if (!worker && 'Worker' in window) {
     try {
-      const { default: EmojiWorker } = await import('./worker?worker&inline');
-      tempWorker = new EmojiWorker();
+      worker = new EmojiWorker();
     } catch (err) {
       console.warn('Error creating web worker:', err);
     }
   }
 
-  if (!tempWorker) {
-    void fallbackLoad();
-    return;
-  }
-
-  const timeoutId = setTimeout(() => {
-    log('worker is not ready after timeout');
-    void fallbackLoad();
-  }, WORKER_TIMEOUT);
-
-  tempWorker.addEventListener(
-    'message',
-    (event: MessageEvent<EmojiWorkerMessage>) => {
+  if (worker) {
+    const timeoutId = setTimeout(() => {
+      log('worker is not ready after timeout');
+      worker = null;
+      void fallbackLoad();
+    }, WORKER_TIMEOUT);
+    worker.addEventListener('message', (event: MessageEvent<string>) => {
       const { data: message } = event;
-
-      worker ??= tempWorker;
-      clearTimeout(timeoutId);
-
-      const { type } = message;
-      if (type === 'log') {
-        workerLog(message.message);
-      } else if (type === 'done' && message.storeName === 'custom') {
-        void loadEmojisToStore();
+      if (message === 'ready') {
+        log('worker ready, loading data');
+        clearTimeout(timeoutId);
+        messageWorker('custom');
+        void loadEmojiLocale(userLocale);
+        // Load English locale as well, because people are still used to
+        // using it from before we supported other locales.
+        if (userLocale !== 'en') {
+          void loadEmojiLocale('en');
+        }
+      } else {
+        log('got worker message: %s', message);
       }
-
-      if (type !== 'ready') {
-        return; // Exit for other messages.
-      }
-
-      const debugValue = localStorage.getItem('debug');
-      if (debugValue) {
-        messageWorker({ type: 'debug', debugValue });
-      }
-
-      workerLog('loading data');
-      messageWorker(userLocale);
-      messageWorker('custom');
-      messageWorker('shortcodes');
-      void loadEmojisToStore();
-    },
-  );
+    });
+  } else {
+    void fallbackLoad();
+  }
 }
 
 async function fallbackLoad() {
   log('falling back to main thread for loading');
-
-  const { importCustomEmojiData, importLegacyShortcodes, importEmojiData } =
-    await import('./loader');
-
-  const customEmojis = await importCustomEmojiData();
-  if (customEmojis && customEmojis.length > 0) {
-    log('loaded %d custom emojis', customEmojis.length);
-  }
-
-  const shortcodes = await importLegacyShortcodes();
-  if (shortcodes?.length) {
-    log('loaded %d legacy shortcodes', shortcodes.length);
-  }
-
-  const emojis = await importEmojiData(userLocale);
+  const { importCustomEmojiData } = await import('./loader');
+  const emojis = await importCustomEmojiData();
   if (emojis) {
-    log('loaded %d emojis to locale %s', emojis.length, userLocale);
+    log('loaded %d custom emojis', emojis.length);
   }
-  await loadEmojisToStore();
+  await loadEmojiLocale(userLocale);
+  if (userLocale !== 'en') {
+    await loadEmojiLocale('en');
+  }
 }
 
-export async function loadCustomEmoji() {
+async function loadEmojiLocale(localeString: string) {
+  const locale = toSupportedLocale(localeString);
+  const { importEmojiData, localeToPath } = await import('./loader');
+
   if (worker) {
-    messageWorker('custom');
+    const path = await localeToPath(locale);
+    log('asking worker to load locale %s from %s', locale, path);
+    messageWorker(locale, path);
   } else {
-    const { importCustomEmojiData } = await import('./loader');
-    const emojis = await importCustomEmojiData();
-    if (emojis && emojis.length > 0) {
-      log('loaded %d custom emojis', emojis.length);
+    const emojis = await importEmojiData(locale);
+    if (emojis) {
+      log('loaded %d emojis to locale %s', emojis.length, locale);
     }
   }
-  await loadEmojisToStore();
 }
 
-function messageWorker(data: EmojiWorkerMessage | string) {
+function messageWorker(locale: LocaleOrCustom, path?: string) {
   if (!worker) {
     return;
   }
-  if (typeof data === 'string') {
-    worker.postMessage({
-      type: 'load',
-      storeName: data,
-    } satisfies EmojiWorkerMessage);
-  } else {
-    worker.postMessage(data);
-  }
-}
-
-async function loadEmojisToStore() {
-  const { store } = await import('@/mastodon/store');
-  const { loadCustomEmojis, loadLocale } =
-    await import('@/mastodon/reducers/slices/emojis');
-
-  loadLocale(userLocale);
-  await store.dispatch(loadCustomEmojis());
-
-  log('loaded emoji data into store');
+  worker.postMessage({ locale, path });
 }

@@ -25,7 +25,7 @@ class IntersectionObserverWrapper {
     this.observerBacklog.forEach(([ id, node, callback ]) => {
       this.observe(id, node, callback);
     });
-    this.observerBacklog = [];
+    this.observerBacklog = null;
   }
 
   observe (id, node, callback) {

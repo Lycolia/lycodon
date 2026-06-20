@@ -18,8 +18,6 @@ class ActivityPub::CollectionSerializer < ActivityPub::Serializer
       ActivityPub::HashtagSerializer
     when 'ActivityPub::CollectionPresenter'
       ActivityPub::CollectionSerializer
-    when 'Collection'
-      ActivityPub::FeaturedCollectionSerializer
     when 'String'
       StringSerializer
     else

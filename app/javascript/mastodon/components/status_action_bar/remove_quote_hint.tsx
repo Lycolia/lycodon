@@ -6,15 +6,15 @@ import classNames from 'classnames';
 
 import Overlay from 'react-overlays/Overlay';
 
-import { useDismissible } from '@/mastodon/hooks/useDismissible';
 import MoreHorizIcon from '@/material-icons/400-24px/more_horiz.svg?react';
 
 import { Button } from '../button';
+import { useDismissableBannerState } from '../dismissable_banner';
 import { Icon } from '../icon';
 
 import classes from './remove_quote_hint.module.css';
 
-const DISMISSIBLE_BANNER_ID = 'notifications/remove_quote_hint';
+const DISMISSABLE_BANNER_ID = 'notifications/remove_quote_hint';
 
 /**
  * We don't want to show this hint in the UI more than once,
@@ -31,7 +31,9 @@ export const RemoveQuoteHint: React.FC<{
   const anchorRef = useRef<HTMLDivElement>(null);
   const intl = useIntl();
 
-  const { wasDismissed, dismiss } = useDismissible(DISMISSIBLE_BANNER_ID);
+  const { wasDismissed, dismiss } = useDismissableBannerState({
+    id: DISMISSABLE_BANNER_ID,
+  });
 
   const shouldShowHint = !wasDismissed && canShowHint;
 
@@ -44,7 +46,6 @@ export const RemoveQuoteHint: React.FC<{
 
     if (!firstHintId) {
       firstHintId = uniqueId;
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsOnlyHint(true);
     }
 
@@ -65,8 +66,8 @@ export const RemoveQuoteHint: React.FC<{
           flip
           offset={[12, 10]}
           placement='bottom-end'
-          target={anchorRef}
-          container={anchorRef}
+          target={anchorRef.current}
+          container={anchorRef.current}
         >
           {({ props, placement }) => (
             <div

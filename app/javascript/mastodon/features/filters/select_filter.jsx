@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { PureComponent } from 'react';
 
-import { defineMessages, FormattedMessage } from 'react-intl';
+import { defineMessages, injectIntl, FormattedMessage } from 'react-intl';
 
 import { connect } from 'react-redux';
 
@@ -9,8 +9,6 @@ import fuzzysort from 'fuzzysort';
 
 import AddIcon from '@/material-icons/400-24px/add.svg?react';
 import { Icon }  from 'mastodon/components/icon';
-import { injectIntl } from '@/mastodon/components/intl';
-import { NavigationFocusTarget } from 'mastodon/components/navigation_focus_target';
 import { toServerSideType } from 'mastodon/utils/filters';
 import { loupeIcon, deleteIcon } from 'mastodon/utils/icons';
 
@@ -177,9 +175,7 @@ class SelectFilter extends PureComponent {
 
     return (
       <>
-        <NavigationFocusTarget as='h1' className='report-dialog-modal__title'>
-          <FormattedMessage id='filter_modal.select_filter.title' defaultMessage='Filter this post' />
-        </NavigationFocusTarget>
+        <h3 className='report-dialog-modal__title'><FormattedMessage id='filter_modal.select_filter.title' defaultMessage='Filter this post' /></h3>
         <p className='report-dialog-modal__lead'><FormattedMessage id='filter_modal.select_filter.subtitle' defaultMessage='Use an existing category or create a new one' /></p>
 
         <div className='emoji-mart-search'>

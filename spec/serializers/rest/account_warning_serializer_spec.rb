@@ -3,9 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe REST::AccountWarningSerializer do
-  subject { serialized_record_json(record, described_class, options: { scope: current_user, scope_name: :current_user }) }
+  subject { serialized_record_json(record, described_class) }
 
-  let(:current_user) { Fabricate(:moderator_user) }
   let(:record) { Fabricate :account_warning, id: 123, status_ids: [456, 789] }
 
   describe 'serialization' do

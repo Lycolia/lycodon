@@ -292,7 +292,7 @@ function shouldMarkNewNotificationsAsRead(
 
 function updateLastReadId(
   state: NotificationGroupsState,
-  group?: NotificationGroup,
+  group: NotificationGroup | undefined = undefined,
 ) {
   if (shouldMarkNewNotificationsAsRead(state)) {
     group = group ?? state.groups.find(isNotificationGroup);

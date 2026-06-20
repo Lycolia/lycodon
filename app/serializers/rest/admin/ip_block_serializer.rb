@@ -9,6 +9,6 @@ class REST::Admin::IpBlockSerializer < ActiveModel::Serializer
   end
 
   def ip
-    object.to_cidr
+    "#{object.ip}/#{object.ip.prefix}"
   end
 end

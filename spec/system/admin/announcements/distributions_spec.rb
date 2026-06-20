@@ -14,10 +14,13 @@ RSpec.describe 'Admin Announcement Mail Distributions' do
       expect(page)
         .to have_title(I18n.t('admin.announcements.preview.title'))
 
-      expect do
+      emails = capture_emails do
         expect { click_on I18n.t('admin.terms_of_service.preview.send_to_all', count: 1, display_count: 1) }
           .to(change { announcement.reload.notification_sent_at })
-      end.to send_email(to: user.email)
+      end
+      expect(emails.first)
+        .to be_present
+        .and(deliver_to(user.email))
       expect(page)
         .to have_title(I18n.t('admin.announcements.title'))
     end

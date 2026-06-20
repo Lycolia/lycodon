@@ -42,7 +42,7 @@ module ChallengableConcern
   end
 
   def render_challenge
-    render 'auth/challenges/new', layout: params[:oauth] ? 'modal' : 'auth'
+    render 'auth/challenges/new', layout: 'auth'
   end
 
   def challenge_passed?

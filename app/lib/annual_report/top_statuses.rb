@@ -5,14 +5,10 @@ class AnnualReport::TopStatuses < AnnualReport::Source
     {
       top_statuses: {
         by_reblogs: status_identifier(most_reblogged_status),
-        by_favourites: nil,
-        by_replies: nil,
+        by_favourites: status_identifier(most_favourited_status),
+        by_replies: status_identifier(most_replied_status),
       },
     }
-  end
-
-  def eligible?
-    report_statuses.distributable_visibility.exists?
   end
 
   private
@@ -43,7 +39,7 @@ class AnnualReport::TopStatuses < AnnualReport::Source
 
   def base_scope
     report_statuses
-      .distributable_visibility
+      .public_visibility
       .joins(:status_stat)
   end
 end

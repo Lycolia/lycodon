@@ -3,7 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Media' do
-  include_context 'with API authentication', oauth_scopes: 'write:media'
+  let(:user)    { Fabricate(:user) }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:scopes)  { 'write:media' }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 
   describe 'GET /api/v1/media/:id' do
     subject do
@@ -102,7 +105,7 @@ RSpec.describe 'Media' do
         allow(user.account).to receive(:media_attachments).and_return(media_attachments)
       end
 
-      context 'when file type cannot be identified' do
+      context 'when imagemagick cannot identify the file type' do
         it 'returns http unprocessable entity' do
           allow(media_attachments).to receive(:create!).and_raise(Paperclip::Errors::NotIdentifiedByImageMagickError)
 

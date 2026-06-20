@@ -3,8 +3,9 @@
 require 'rails_helper'
 
 RSpec.describe 'AsyncRefreshes' do
-  include_context 'with API authentication'
-
+  let(:user)    { Fabricate(:user) }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
   let(:job) { AsyncRefresh.new('test_job') }
 
   describe 'GET /api/v1_alpha/async_refreshes/:id' do

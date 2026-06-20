@@ -3,7 +3,6 @@ import { createAction } from '@reduxjs/toolkit';
 import {
   apiRemoveAccountFromFollowers,
   apiGetEndorsedAccounts,
-  apiGetAccounts,
 } from 'mastodon/api/accounts';
 import type { ApiRelationshipJSON } from 'mastodon/api_types/relationships';
 import { createDataLoadingThunk } from 'mastodon/store/typed_functions';
@@ -109,15 +108,6 @@ export const removeAccountFromFollowers = createDataLoadingThunk(
 export const fetchEndorsedAccounts = createDataLoadingThunk(
   'accounts/endorsements',
   ({ accountId }: { accountId: string }) => apiGetEndorsedAccounts(accountId),
-  (data, { dispatch }) => {
-    dispatch(importFetchedAccounts(data));
-    return data;
-  },
-);
-
-export const fetchAccounts = createDataLoadingThunk(
-  'accounts/multi_accounts',
-  ({ accountIds }: { accountIds: string[] }) => apiGetAccounts(accountIds),
   (data, { dispatch }) => {
     dispatch(importFetchedAccounts(data));
     return data;

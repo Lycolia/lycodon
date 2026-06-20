@@ -6,10 +6,8 @@ RSpec.describe 'Public files' do
   include RoutingHelper
 
   context 'when requesting service worker file' do
-    before { stub_const 'Mastodon::Middleware::PublicFileServer::SERVICE_WORKER_PATH', '/robots.txt' }
-
     it 'returns the file with the expected headers' do
-      get Mastodon::Middleware::PublicFileServer::SERVICE_WORKER_PATH
+      get '/sw.js'
 
       expect(response)
         .to have_http_status(200)

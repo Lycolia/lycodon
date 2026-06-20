@@ -1,8 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 
+import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
-
-import { Helmet } from '@unhead/react/helmet';
 
 import TrendingUpIcon from '@/material-icons/400-24px/trending_up.svg?react';
 import { expandLinkTimeline } from 'mastodon/actions/timelines';
@@ -22,7 +21,8 @@ export const LinkTimeline: React.FC<{
   const columnRef = useRef<ColumnRef>(null);
   const firstStatusId = useAppSelector((state) =>
     decodedUrl
-      ? (state.timelines.getIn([`link:${decodedUrl}`, 'items', 0]) as string)
+      ? // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        (state.timelines.getIn([`link:${decodedUrl}`, 'items', 0]) as string)
       : undefined,
   );
   const story = useAppSelector((state) =>

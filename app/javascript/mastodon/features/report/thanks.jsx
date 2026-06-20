@@ -12,7 +12,6 @@ import {
   blockAccount,
 } from 'mastodon/actions/accounts';
 import { Button } from 'mastodon/components/button';
-import { NavigationFocusTarget } from 'mastodon/components/navigation_focus_target';
 
 const mapStateToProps = () => ({});
 
@@ -53,9 +52,7 @@ class Thanks extends PureComponent {
 
     return (
       <>
-        <NavigationFocusTarget as='h1' className='report-dialog-modal__title'>
-          {submitted ? <FormattedMessage id='report.thanks.title_actionable' defaultMessage="Thanks for reporting, we'll look into this." /> : <FormattedMessage id='report.thanks.title' defaultMessage="Don't want to see this?" />}
-        </NavigationFocusTarget>
+        <h3 className='report-dialog-modal__title'>{submitted ? <FormattedMessage id='report.thanks.title_actionable' defaultMessage="Thanks for reporting, we'll look into this." /> : <FormattedMessage id='report.thanks.title' defaultMessage="Don't want to see this?" />}</h3>
         <p className='report-dialog-modal__lead'>{submitted ? <FormattedMessage id='report.thanks.take_action_actionable' defaultMessage='While we review this, you can take action against @{name}:' values={{ name: account.get('username') }} /> : <FormattedMessage id='report.thanks.take_action' defaultMessage='Here are your options for controlling what you see on Mastodon:' />}</p>
 
         {account.getIn(['relationship', 'following']) && (

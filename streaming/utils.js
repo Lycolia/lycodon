@@ -30,13 +30,15 @@ export function isTruthy(value) {
  */
 const NON_ASCII_CHARS        = 'ÀÁÂÃÄÅàáâãäåĀāĂăĄąÇçĆćĈĉĊċČčÐðĎďĐđÈÉÊËèéêëĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħÌÍÎÏìíîïĨĩĪīĬĭĮįİıĴĵĶķĸĹĺĻļĽľĿŀŁłÑñŃńŅņŇňŉŊŋÒÓÔÕÖØòóôõöøŌōŎŏŐőŔŕŖŗŘřŚśŜŝŞşŠšſŢţŤťŦŧÙÚÛÜùúûüŨũŪūŬŭŮůŰűŲųŴŵÝýÿŶŷŸŹźŻżŽž';
 const EQUIVALENT_ASCII_CHARS = 'AAAAAAaaaaaaAaAaAaCcCcCcCcCcDdDdDdEEEEeeeeEeEeEeEeEeGgGgGgGgHhHhIIIIiiiiIiIiIiIiIiJjKkkLlLlLlLlLlNnNnNnNnnNnOOOOOOooooooOoOoOoRrRrRrSsSsSsSssTtTtTtUUUUuuuuUuUuUuUuUuUuWwYyyYyYZzZzZz';
-const FOLDTOASCII_REGEX = new RegExp(NON_ASCII_CHARS.split('').join('|'), 'g');
+
 /**
  * @param {string} str
  * @returns {string}
  */
 export function foldToASCII(str) {
-  return str.replace(FOLDTOASCII_REGEX, function(match) {
+  const regex = new RegExp(NON_ASCII_CHARS.split('').join('|'), 'g');
+
+  return str.replace(regex, function(match) {
     const index = NON_ASCII_CHARS.indexOf(match);
     return EQUIVALENT_ASCII_CHARS[index];
   });

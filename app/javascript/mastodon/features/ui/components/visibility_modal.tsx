@@ -13,7 +13,6 @@ import { Button } from '@/mastodon/components/button';
 import { Dropdown } from '@/mastodon/components/dropdown';
 import type { SelectItem } from '@/mastodon/components/dropdown_selector';
 import { IconButton } from '@/mastodon/components/icon_button';
-import { NavigationFocusTarget } from '@/mastodon/components/navigation_focus_target';
 import { messages as privacyMessages } from '@/mastodon/features/compose/components/privacy_dropdown';
 import { createAppSelector, useAppSelector } from '@/mastodon/store';
 import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
@@ -218,15 +217,14 @@ export const VisibilityModal: FC<VisibilityModalProps> = forwardRef(
             iconComponent={CloseIcon}
             onClick={onClose}
           />
-          <NavigationFocusTarget
-            as='h1'
-            className='dialog-modal__header__title'
+          <FormattedMessage
+            id='visibility_modal.header'
+            defaultMessage='Visibility and interaction'
           >
-            <FormattedMessage
-              id='visibility_modal.header'
-              defaultMessage='Visibility and interaction'
-            />
-          </NavigationFocusTarget>
+            {(chunks) => (
+              <span className='dialog-modal__header__title'>{chunks}</span>
+            )}
+          </FormattedMessage>
         </div>
         <div className='dialog-modal__content'>
           <div className='dialog-modal__content__description'>

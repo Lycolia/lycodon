@@ -23,10 +23,10 @@ class PushUpdateWorker
   end
 
   def message
-    JSON.generate({
+    Oj.dump(
       event: update? ? :'status.update' : :update,
-      payload: @payload,
-    }.as_json)
+      payload: @payload
+    )
   end
 
   def publish!

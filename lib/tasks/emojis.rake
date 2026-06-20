@@ -60,11 +60,11 @@ end
 namespace :emojis do
   desc 'Generate a unicode to filename mapping'
   task :generate do
-    source = 'https://www.unicode.org/Public/emoji/16.0/emoji-test.txt'
+    source = 'http://www.unicode.org/Public/emoji/16.0/emoji-test.txt'
     codes  = []
     dest   = Rails.root.join('app', 'javascript', 'mastodon', 'features', 'emoji', 'emoji_map.json')
 
-    puts "Downloading emojis from source... (#{source})"
+    puts "Downloading emojos from source... (#{source})"
 
     HTTP.get(source).to_s.split("\n").each do |line|
       next if line.start_with? '#'
@@ -72,13 +72,11 @@ namespace :emojis do
       parts = line.split(';').map(&:strip)
       next if parts.size < 2
 
-      codes << [parts[0], parts[1].split.first]
+      codes << [parts[0], parts[1].start_with?('fully-qualified')]
     end
 
     grouped_codes = codes.reduce([]) do |agg, current|
-      qualification = current[1]
-
-      if qualification == 'fully-qualified' || qualification == 'component' || agg.empty?
+      if current[1]
         agg << [current[0]]
       else
         agg.last << current[0]
@@ -101,8 +99,8 @@ namespace :emojis do
 
     map = map.sort { |a, b| a[0].size <=> b[0].size }.to_h
 
-    File.write(dest, JSON.dump(map))
-    puts "Wrote emoji to destination! (#{dest})"
+    File.write(dest, Oj.dump(map))
+    puts "Wrote emojo to destination! (#{dest})"
   end
 
   desc 'Generate emoji variants with white borders'
@@ -111,7 +109,7 @@ namespace :emojis do
     emojis_light = '👽⚾🐔☁️💨🕊️👀🍥👻🐐❕❔⛸️🌩️🔊🔇📃🌧️🐏🍚🍙🐓🐑💀☠️🌨️🔉🔈💬💭🏐🏳️⚪⬜◽◻️▫️🪽🪿'
     emojis_dark = '🎱🐜⚫🖤⬛◼️◾◼️✒️▪️💣🎳📷📸♣️🕶️✴️🔌💂‍♀️📽️🍳🦍💂🔪🕳️🕹️🕋🖊️🖋️💂‍♂️🎤🎓🎥🎼♠️🎩🦃📼📹🎮🐃🏴🐞🕺📱📲🚲🪮🐦‍⬛'
 
-    map = JSON.parse(File.read(src))
+    map = Oj.load(File.read(src))
 
     emojis_light.each_grapheme_cluster do |emoji|
       gen_border map[emoji], 'black'
@@ -195,7 +193,7 @@ namespace :emojis do
     require 'vips'
 
     src = Rails.root.join('app', 'javascript', 'mastodon', 'features', 'emoji', 'emoji_data.json')
-    sheet = JSON.load_file(src)
+    sheet = Oj.load(File.read(src))
 
     max = 0
     sheet['emojis'].each_value do |row|

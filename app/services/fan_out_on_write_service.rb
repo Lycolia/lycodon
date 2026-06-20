@@ -14,8 +14,6 @@ class FanOutOnWriteService < BaseService
     @account   = status.account
     @options   = options
 
-    return if @status.proper.account.suspended?
-
     check_race_condition!
     warm_payload_cache!
 
@@ -79,11 +77,9 @@ class FanOutOnWriteService < BaseService
   end
 
   def notify_mentioned_accounts!
-    @status.active_mentions.joins(:account).merge(Account.local).select(:id, :account_id).reorder(nil).find_in_batches do |mentions|
+    @status.active_mentions.where.not(id: @options[:silenced_account_ids] || []).joins(:account).merge(Account.local).select(:id, :account_id).reorder(nil).find_in_batches do |mentions|
       LocalNotificationWorker.push_bulk(mentions) do |mention|
-        options = { 'silenced' => true } if @options[:silenced_account_ids]&.include?(mention.account_id)
-
-        [mention.account_id, mention.id, 'Mention', 'mention', options].compact
+        [mention.account_id, mention.id, 'Mention', 'mention']
       end
 
       next unless update?
@@ -171,10 +167,10 @@ class FanOutOnWriteService < BaseService
   end
 
   def anonymous_payload
-    @anonymous_payload ||= JSON.generate({
+    @anonymous_payload ||= Oj.dump(
       event: update? ? :'status.update' : :update,
-      payload: rendered_status,
-    }.as_json)
+      payload: rendered_status
+    )
   end
 
   def rendered_status

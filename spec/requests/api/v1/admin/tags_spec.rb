@@ -3,8 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Tags' do
-  include_context 'with API authentication', user_fabricator: :admin_user, oauth_scopes: 'admin:read admin:write'
-
+  let(:role)    { UserRole.find_by(name: 'Admin') }
+  let(:user)    { Fabricate(:user, role: role) }
+  let(:scopes)  { 'admin:read admin:write' }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
   let(:tag)     { Fabricate(:tag) }
   let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 

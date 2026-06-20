@@ -87,7 +87,7 @@ RSpec.describe Mastodon::CLI::Domains do
         end
 
         def json_summary
-          { 'host.example': { activity: {} } }.to_json
+          Oj.dump('host.example': { activity: {} })
         end
       end
     end

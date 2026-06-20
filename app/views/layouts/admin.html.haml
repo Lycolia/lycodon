@@ -6,9 +6,8 @@
 - content_for :body_classes, 'admin'
 
 - content_for :content do
-  %a.navigation-skip-link{ href: '#content' }= t('admin.skip_to_content')
   .admin-wrapper
-    %header.sidebar-wrapper
+    .sidebar-wrapper
       .sidebar-wrapper__inner
         .sidebar
           = link_to root_path do
@@ -23,17 +22,16 @@
               = material_symbol 'menu'
               = material_symbol 'close'
 
-          %nav
-            = render_navigation
+          = render_navigation
 
-    %main.content-wrapper#content
+    .content-wrapper
       .content
         .content__heading
           - if content_for?(:heading)
             = yield :heading
           - else
             .content__heading__row
-              %h1= yield :page_title
+              %h2= yield :page_title
 
               - if content_for?(:heading_actions)
                 .content__heading__actions

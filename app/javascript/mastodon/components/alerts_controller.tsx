@@ -11,7 +11,6 @@ import type {
 } from 'mastodon/models/alert';
 import { useAppSelector, useAppDispatch } from 'mastodon/store';
 
-import { A11yLiveRegion } from './a11y_live_region';
 import { Alert } from './alert';
 
 const formatIfNeeded = (
@@ -76,8 +75,12 @@ const TimedAlert: React.FC<{
 export const AlertsController: React.FC = () => {
   const alerts = useAppSelector((state) => state.alerts);
 
+  if (alerts.length === 0) {
+    return null;
+  }
+
   return (
-    <A11yLiveRegion className='notification-list'>
+    <div className='notification-list'>
       {alerts.map((alert, idx) => (
         <TimedAlert
           key={alert.key}
@@ -85,6 +88,6 @@ export const AlertsController: React.FC = () => {
           dismissAfter={5000 + idx * 1000}
         />
       ))}
-    </A11yLiveRegion>
+    </div>
   );
 };

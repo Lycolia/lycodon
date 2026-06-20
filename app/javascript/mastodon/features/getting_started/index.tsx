@@ -1,6 +1,6 @@
 import { useIntl } from 'react-intl';
 
-import { Helmet } from '@unhead/react/helmet';
+import { Helmet } from 'react-helmet';
 
 import { Column } from 'mastodon/components/column';
 
@@ -13,7 +13,7 @@ const GettingStarted: React.FC = () => {
     <Column>
       <NavigationPanel multiColumn />
 
-      <LinkFooter context='multi-column' />
+      <LinkFooter multiColumn />
 
       <Helmet>
         <title>

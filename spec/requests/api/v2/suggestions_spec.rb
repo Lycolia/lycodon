@@ -3,7 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Suggestions API' do
-  include_context 'with API authentication', oauth_scopes: 'read'
+  let(:user)    { Fabricate(:user) }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:scopes)  { 'read' }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 
   describe 'GET /api/v2/suggestions' do
     let(:bob) { Fabricate(:account) }

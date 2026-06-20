@@ -128,18 +128,15 @@ export default function api(withAuthorization = true) {
 }
 
 type ApiUrl = `v${1 | '1_alpha' | 2}/${string}`;
-type RequestParamsOrData<T = unknown> = T | Record<string, unknown>;
+type RequestParamsOrData = Record<string, unknown>;
 
-export async function apiRequest<
-  ApiResponse = unknown,
-  ApiParamsOrData = unknown,
->(
+export async function apiRequest<ApiResponse = unknown>(
   method: Method,
   url: string,
   args: {
     signal?: AbortSignal;
-    params?: RequestParamsOrData<ApiParamsOrData>;
-    data?: RequestParamsOrData<ApiParamsOrData>;
+    params?: RequestParamsOrData;
+    data?: RequestParamsOrData;
     timeout?: number;
   } = {},
 ) {
@@ -152,41 +149,30 @@ export async function apiRequest<
   return data;
 }
 
-export async function apiRequestGet<ApiResponse = unknown, ApiParams = unknown>(
+export async function apiRequestGet<ApiResponse = unknown>(
   url: ApiUrl,
-  params?: RequestParamsOrData<ApiParams>,
-  args: {
-    signal?: AbortSignal;
-    timeout?: number;
-  } = {},
+  params?: RequestParamsOrData,
 ) {
-  return apiRequest<ApiResponse>('GET', url, { params, ...args });
+  return apiRequest<ApiResponse>('GET', url, { params });
 }
 
-export async function apiRequestPost<ApiResponse = unknown, ApiData = unknown>(
+export async function apiRequestPost<ApiResponse = unknown>(
   url: ApiUrl,
-  data?: RequestParamsOrData<ApiData>,
+  data?: RequestParamsOrData,
 ) {
   return apiRequest<ApiResponse>('POST', url, { data });
 }
 
-export async function apiRequestPut<ApiResponse = unknown, ApiData = unknown>(
+export async function apiRequestPut<ApiResponse = unknown>(
   url: ApiUrl,
-  data?: RequestParamsOrData<ApiData>,
+  data?: RequestParamsOrData,
 ) {
   return apiRequest<ApiResponse>('PUT', url, { data });
 }
 
-export async function apiRequestDelete<
-  ApiResponse = unknown,
-  ApiParams = unknown,
->(url: ApiUrl, params?: RequestParamsOrData<ApiParams>) {
-  return apiRequest<ApiResponse>('DELETE', url, { params });
-}
-
-export async function apiRequestPatch<ApiResponse = unknown, ApiData = unknown>(
+export async function apiRequestDelete<ApiResponse = unknown>(
   url: ApiUrl,
-  data?: RequestParamsOrData<ApiData>,
+  params?: RequestParamsOrData,
 ) {
-  return apiRequest<ApiResponse>('PATCH', url, { data });
+  return apiRequest<ApiResponse>('DELETE', url, { params });
 }

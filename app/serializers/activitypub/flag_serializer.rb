@@ -17,24 +17,10 @@ class ActivityPub::FlagSerializer < ActivityPub::Serializer
   end
 
   def virtual_object
-    target_account_uris + status_uris + collection_uris
+    [ActivityPub::TagManager.instance.uri_for(object.target_account)] + object.statuses.map { |s| ActivityPub::TagManager.instance.uri_for(s) }
   end
 
   def content
     object.comment
-  end
-
-  private
-
-  def target_account_uris
-    [ActivityPub::TagManager.instance.uri_for(object.target_account)]
-  end
-
-  def status_uris
-    object.statuses.map { |s| ActivityPub::TagManager.instance.uri_for(s) }
-  end
-
-  def collection_uris
-    object.collections.map { |c| ActivityPub::TagManager.instance.uri_for(c) }
   end
 end

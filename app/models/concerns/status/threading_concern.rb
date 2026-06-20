@@ -8,10 +8,9 @@ module Status::ThreadingConcern
       statuses    = Status.with_accounts(ids).to_a
       account_ids = statuses.map(&:account_id).uniq
       domains     = statuses.filter_map(&:account_domain).uniq
+      relations   = account&.relations_map(account_ids, domains) || {}
 
-      account&.preload_relations!(account_ids, domains)
-
-      statuses.reject! { |status| StatusFilter.new(status, account).filtered? }
+      statuses.reject! { |status| StatusFilter.new(status, account, relations).filtered? }
 
       if stable
         statuses.sort_by! { |status| ids.index(status.id) }
@@ -49,7 +48,7 @@ module Status::ThreadingConcern
   end
 
   def ancestor_statuses(limit)
-    Status.find_by_sql([<<~SQL.squish, id: in_reply_to_id, limit: limit])
+    Status.find_by_sql([<<-SQL.squish, id: in_reply_to_id, limit: limit])
       WITH RECURSIVE search_tree(id, in_reply_to_id, path)
       AS (
         SELECT id, in_reply_to_id, ARRAY[id]
@@ -73,7 +72,7 @@ module Status::ThreadingConcern
     depth += 1 if depth.present?
     limit += 1 if limit.present?
 
-    descendants_with_self = Status.find_by_sql([<<~SQL.squish, id: id, limit: limit, depth: depth])
+    descendants_with_self = Status.find_by_sql([<<-SQL.squish, id: id, limit: limit, depth: depth])
       WITH RECURSIVE search_tree(id, path) AS (
         SELECT id, ARRAY[id]
         FROM statuses

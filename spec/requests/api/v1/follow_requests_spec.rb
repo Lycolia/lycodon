@@ -3,9 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Follow requests' do
-  include_context 'with API authentication', oauth_scopes: 'read:follows write:follows'
-
-  let(:user) { Fabricate(:user, account_attributes: { locked: true }) }
+  let(:user)     { Fabricate(:user, account_attributes: { locked: true }) }
+  let(:token)    { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:scopes)   { 'read:follows write:follows' }
+  let(:headers)  { { 'Authorization' => "Bearer #{token.token}" } }
 
   describe 'GET /api/v1/follow_requests' do
     subject do

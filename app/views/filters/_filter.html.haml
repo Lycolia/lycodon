@@ -19,7 +19,9 @@
             .permissions-list__item__text__title
               = t('filters.index.keywords', count: filter.keywords.size)
             .permissions-list__item__text__type
-              = filter_keywords(filter)
+              - keywords = filter.keywords.map(&:keyword)
+              - keywords = keywords.take(5) + ['…'] if keywords.size > 5 # TODO
+              = keywords.join(', ')
       - unless filter.statuses.empty?
         %li.permissions-list__item
           .permissions-list__item__icon

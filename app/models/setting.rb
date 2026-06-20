@@ -5,8 +5,8 @@
 # Table name: settings
 #
 #  id         :bigint(8)        not null, primary key
-#  value      :text
 #  var        :string           not null
+#  value      :text
 #  created_at :datetime
 #  updated_at :datetime
 #

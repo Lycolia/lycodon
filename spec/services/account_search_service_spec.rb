@@ -86,16 +86,4 @@ RSpec.describe AccountSearchService do
       expect(results).to eq []
     end
   end
-
-  context 'when elasticsearch is enabled', :search do
-    it 'returns matching accounts' do
-      account = Fabricate(:account, username: 'matchingusername')
-
-      AccountsIndex.import!
-
-      results = subject.call('match', nil, limit: 5)
-
-      expect(results).to eq [account]
-    end
-  end
 end

@@ -77,8 +77,7 @@ const initialState = ImmutableMap({
   follow_requests: initialListState,
   blocks: initialListState,
   mutes: initialListState,
-  /** @type {ImmutableMap<string, typeof initialListState>} */
-  featured_tags: ImmutableMap(),
+  featured_tags: initialListState,
 });
 
 const normalizeList = (state, path, accounts, next) => {
@@ -205,9 +204,9 @@ export default function userLists(state = initialState, action) {
     else if (fetchFeaturedTags.rejected.match(action))
       return state.setIn(['featured_tags', action.meta.arg.accountId, 'isLoading'], false);
     else if (fetchDirectory.fulfilled.match(action))
-      return normalizeList(state, ['directory'], action.payload.accounts, action.payload.isLast ? null : true);
+      return normalizeList(state, ['directory'], action.payload.accounts, undefined);
     else if (expandDirectory.fulfilled.match(action))
-      return appendToList(state, ['directory'], action.payload.accounts, action.payload.isLast ? null : true);
+      return appendToList(state, ['directory'], action.payload.accounts, undefined);
     else if (fetchDirectory.pending.match(action) ||
      expandDirectory.pending.match(action))
       return state.setIn(['directory', 'isLoading'], true);

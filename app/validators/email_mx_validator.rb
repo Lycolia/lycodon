@@ -2,21 +2,21 @@
 
 require 'resolv'
 
-class EmailMxValidator < ActiveModel::EachValidator
-  def validate_each(record, attribute, value)
-    return if value.blank?
+class EmailMxValidator < ActiveModel::Validator
+  def validate(user)
+    return if user.email.blank?
 
-    domain = get_domain(value)
+    domain = get_domain(user.email)
 
     if domain.blank? || domain.include?('..')
-      record.errors.add(attribute, :invalid)
+      user.errors.add(:email, :invalid)
     elsif !on_allowlist?(domain)
       resolved_ips, resolved_domains = resolve_mx(domain)
 
       if resolved_ips.empty?
-        record.errors.add(attribute, :unreachable)
-      elsif email_domain_blocked?([domain, *resolved_domains], options[:attempt_ip].is_a?(Symbol) ? record.public_send(options[:attempt_ip]) : nil)
-        record.errors.add(attribute, :blocked)
+        user.errors.add(:email, :unreachable)
+      elsif email_domain_blocked?(resolved_domains, user.sign_up_ip)
+        user.errors.add(:email, :blocked)
       end
     end
   end

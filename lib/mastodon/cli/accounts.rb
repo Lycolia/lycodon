@@ -17,6 +17,7 @@ module Mastodon::CLI
     LONG_DESC
     def rotate(username = nil)
       if options[:all]
+        processed = 0
         delay     = 0
         scope     = Account.local.without_suspended
         progress  = create_progress_bar(scope.count)
@@ -25,13 +26,14 @@ module Mastodon::CLI
           accounts.each do |account|
             rotate_keys_for_account(account, delay)
             progress.increment
+            processed += 1
           end
 
           delay += 5.minutes
         end
 
         progress.finish
-        say("OK, rotated keys for #{progress.progress} accounts", :green)
+        say("OK, rotated keys for #{processed} accounts", :green)
       elsif username.present?
         rotate_keys_for_account(Account.find_local(username))
         say('OK', :green)
@@ -440,6 +442,7 @@ module Mastodon::CLI
       total    += account.following.reorder(nil).count if options[:follows]
       total    += account.followers.reorder(nil).count if options[:followers]
       progress  = create_progress_bar(total)
+      processed = 0
 
       if options[:follows]
         account.following.reorder(nil).find_each do |target_account|
@@ -448,6 +451,7 @@ module Mastodon::CLI
           progress.log pastel.red("Error processing #{target_account.id}: #{e}")
         ensure
           progress.increment
+          processed += 1
         end
 
         BootstrapTimelineWorker.perform_async(account.id)
@@ -460,11 +464,12 @@ module Mastodon::CLI
           progress.log pastel.red("Error processing #{target_account.id}: #{e}")
         ensure
           progress.increment
+          processed += 1
         end
       end
 
       progress.finish
-      say("Processed #{progress.progress} relationships", :green, true)
+      say("Processed #{processed} relationships", :green, true)
     end
 
     option :number, type: :numeric, aliases: [:n]

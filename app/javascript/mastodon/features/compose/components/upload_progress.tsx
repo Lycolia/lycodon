@@ -30,19 +30,17 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
       <Icon id='upload' icon={UploadFileIcon} />
 
       <div className='upload-progress__message'>
-        <span>
-          {isProcessing ? (
-            <FormattedMessage
-              id='upload_progress.processing'
-              defaultMessage='Processing…'
-            />
-          ) : (
-            <FormattedMessage
-              id='upload_progress.label'
-              defaultMessage='Uploading…'
-            />
-          )}
-        </span>
+        {isProcessing ? (
+          <FormattedMessage
+            id='upload_progress.processing'
+            defaultMessage='Processing…'
+          />
+        ) : (
+          <FormattedMessage
+            id='upload_progress.label'
+            defaultMessage='Uploading…'
+          />
+        )}
 
         <div className='upload-progress__backdrop'>
           <animated.div className='upload-progress__tracker' style={styles} />

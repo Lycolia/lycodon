@@ -3,7 +3,6 @@ import { useCallback, useEffect } from 'react';
 import { useIntl, defineMessages } from 'react-intl';
 
 import classNames from 'classnames';
-import { Link } from 'react-router-dom';
 
 import { useIdentity } from '@/mastodon/identity_context';
 import {
@@ -60,14 +59,7 @@ export const FollowButton: React.FC<{
   compact?: boolean;
   labelLength?: 'auto' | 'short' | 'long';
   className?: string;
-  withUnmute?: boolean;
-}> = ({
-  accountId,
-  compact,
-  labelLength = 'auto',
-  className,
-  withUnmute = true,
-}) => {
+}> = ({ accountId, compact, labelLength = 'auto', className }) => {
   const intl = useIntl();
   const dispatch = useAppDispatch();
   const { signedIn } = useIdentity();
@@ -91,7 +83,6 @@ export const FollowButton: React.FC<{
         openModal({
           modalType: 'INTERACTION',
           modalProps: {
-            intent: 'follow',
             accountId: accountId,
             url: account?.url,
           },
@@ -103,14 +94,7 @@ export const FollowButton: React.FC<{
 
     if (accountId === me) {
       return;
-    } else if (relationship.blocking) {
-      dispatch(
-        openModal({
-          modalType: 'CONFIRM_UNBLOCK',
-          modalProps: { account },
-        }),
-      );
-    } else if (relationship.muting && withUnmute) {
+    } else if (relationship.muting) {
       dispatch(unmuteAccount(accountId));
     } else if (account && relationship.following) {
       dispatch(
@@ -123,10 +107,17 @@ export const FollowButton: React.FC<{
           modalProps: { account },
         }),
       );
+    } else if (relationship.blocking) {
+      dispatch(
+        openModal({
+          modalType: 'CONFIRM_UNBLOCK',
+          modalProps: { account },
+        }),
+      );
     } else {
       dispatch(followAccount(accountId));
     }
-  }, [signedIn, relationship, accountId, withUnmute, account, dispatch]);
+  }, [dispatch, accountId, relationship, account, signedIn]);
 
   const isNarrow = useBreakpoint('narrow');
   const useShortLabel =
@@ -138,8 +129,6 @@ export const FollowButton: React.FC<{
     : messages.follow;
 
   let label;
-  let disabled =
-    relationship?.blocked_by || account?.suspended || !!account?.moved;
 
   if (!signedIn) {
     label = intl.formatMessage(followMessage);
@@ -147,18 +136,14 @@ export const FollowButton: React.FC<{
     label = intl.formatMessage(messages.editProfile);
   } else if (!relationship) {
     label = <LoadingIndicator />;
-  } else if (relationship.muting && withUnmute) {
+  } else if (relationship.muting) {
     label = intl.formatMessage(messages.unmute);
-    disabled = false;
   } else if (relationship.following) {
     label = intl.formatMessage(messages.unfollow);
-    disabled = false;
   } else if (relationship.blocking) {
     label = intl.formatMessage(messages.unblock);
-    disabled = false;
   } else if (relationship.requested) {
     label = intl.formatMessage(messages.followRequestCancel);
-    disabled = false;
   } else if (relationship.followed_by && !account?.locked) {
     label = intl.formatMessage(messages.followBack);
   } else {
@@ -166,22 +151,29 @@ export const FollowButton: React.FC<{
   }
 
   if (accountId === me) {
-    const buttonClasses = classNames(className, 'button button-secondary', {
-      'button--compact': compact,
-    });
-
     return (
-      <Link to='/profile/edit' className={buttonClasses}>
+      <a
+        href='/settings/profile'
+        target='_blank'
+        rel='noopener'
+        className={classNames(className, 'button button-secondary', {
+          'button--compact': compact,
+        })}
+      >
         {label}
-      </Link>
+      </a>
     );
   }
 
   return (
     <Button
       onClick={handleClick}
-      disabled={disabled}
-      secondary={following || relationship?.blocking}
+      disabled={
+        relationship?.blocked_by ||
+        (!(relationship?.following || relationship?.requested) &&
+          (account?.suspended || !!account?.moved))
+      }
+      secondary={following}
       compact={compact}
       className={classNames(className, { 'button--destructive': following })}
     >

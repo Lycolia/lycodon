@@ -8,7 +8,6 @@ import { escapeRegExp } from 'lodash';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { DisplayName } from '@/mastodon/components/display_name';
-import { NavigationFocusTarget } from '@/mastodon/components/navigation_focus_target';
 import { openModal, closeModal } from 'mastodon/actions/modal';
 import { apiRequest } from 'mastodon/api';
 import { Button } from 'mastodon/components/button';
@@ -26,8 +25,6 @@ const messages = defineMessages({
   },
 });
 
-type InteractionIntent = 'follow' | 'reblog' | 'favourite' | 'reply' | 'vote';
-
 interface LoginFormMessage {
   type:
     | 'fetchInteractionURL'
@@ -35,8 +32,6 @@ interface LoginFormMessage {
     | 'fetchInteractionURL-success';
   uri_or_domain: string;
   template?: string;
-  param?: string;
-  intent?: InteractionIntent;
 }
 
 const PERSISTENCE_KEY = 'mastodon_home';
@@ -115,11 +110,7 @@ const isValueValid = (value: string) => {
   }
 };
 
-const sendToFrame = (
-  frame: HTMLIFrameElement | null,
-  value: string,
-  intent: string,
-): void => {
+const sendToFrame = (frame: HTMLIFrameElement | null, value: string): void => {
   if (valueToDomain(value.trim()) === localDomain) {
     window.location.href = '/auth/sign_in';
     return;
@@ -129,7 +120,6 @@ const sendToFrame = (
     {
       type: 'fetchInteractionURL',
       uri_or_domain: value.trim(),
-      intent,
     },
     window.origin,
   );
@@ -137,8 +127,7 @@ const sendToFrame = (
 
 const LoginForm: React.FC<{
   resourceUrl: string;
-  intent: string;
-}> = ({ resourceUrl, intent }) => {
+}> = ({ resourceUrl }) => {
   const intl = useIntl();
   const [value, setValue] = useState(
     localStorage.getItem(PERSISTENCE_KEY) ?? '',
@@ -172,7 +161,7 @@ const LoginForm: React.FC<{
           try {
             const url = new URL(
               event.data.template.replace(
-                `{${event.data.param}}`,
+                '{uri}',
                 encodeURIComponent(resourceUrl),
               ),
             );
@@ -253,8 +242,8 @@ const LoginForm: React.FC<{
 
   const handleSubmit = useCallback(() => {
     setIsSubmitting(true);
-    sendToFrame(iframeRef.current, value, intent);
-  }, [setIsSubmitting, value, intent]);
+    sendToFrame(iframeRef.current, value);
+  }, [setIsSubmitting, value]);
 
   const handleFocus = useCallback(() => {
     setExpanded(true);
@@ -298,7 +287,7 @@ const LoginForm: React.FC<{
             setError(false);
             setValue(selectedOptionValue);
             setIsSubmitting(true);
-            sendToFrame(iframeRef.current, selectedOptionValue, intent);
+            sendToFrame(iframeRef.current, selectedOptionValue);
           }
 
           break;
@@ -311,7 +300,6 @@ const LoginForm: React.FC<{
       setValue,
       selectedOption,
       options,
-      intent,
     ],
   );
 
@@ -330,9 +318,9 @@ const LoginForm: React.FC<{
       setValue(option);
       setError(false);
       setIsSubmitting(true);
-      sendToFrame(iframeRef.current, option, intent);
+      sendToFrame(iframeRef.current, option);
     },
-    [options, setSelectedOption, setValue, setError, intent],
+    [options, setSelectedOption, setValue, setError],
   );
 
   const domain = (valueToDomain(value) ?? '').trim();
@@ -393,7 +381,6 @@ const LoginForm: React.FC<{
                 className={classNames('search__popout__menu__item', {
                   selected: selectedOption === i,
                 })}
-                type='button'
               >
                 {option
                   .split(domainRegExp)
@@ -416,11 +403,12 @@ const LoginForm: React.FC<{
 const InteractionModal: React.FC<{
   accountId: string;
   url: string;
-  intent: string;
-}> = ({ accountId, url, intent }) => {
+}> = ({ accountId, url }) => {
   const dispatch = useAppDispatch();
   const signupUrl = useAppSelector(
-    (state) => state.server.server.item?.registrations.url ?? '/auth/sign_up',
+    (state) =>
+      (state.server.getIn(['server', 'registrations', 'url'], null) ||
+        '/auth/sign_up') as string,
   );
   const account = useAppSelector((state) => state.accounts.get(accountId));
   const name = <DisplayName account={account} variant='simple' />;
@@ -463,7 +451,7 @@ const InteractionModal: React.FC<{
     );
   } else {
     signupButton = (
-      <button className='link-button' onClick={handleSignupClick} type='button'>
+      <button className='link-button' onClick={handleSignupClick}>
         <FormattedMessage
           id='sign_in_banner.create_account'
           defaultMessage='Create account'
@@ -475,30 +463,22 @@ const InteractionModal: React.FC<{
   return (
     <div className='modal-root__modal interaction-modal'>
       <div className='interaction-modal__lead'>
-        <NavigationFocusTarget as='h1'>
+        <h3>
           <FormattedMessage
             id='interaction_modal.title'
             defaultMessage='Sign in to continue'
           />
-        </NavigationFocusTarget>
+        </h3>
         <p>
-          {intent === 'follow' ? (
-            <FormattedMessage
-              id='interaction_modal.action_follow'
-              defaultMessage='To follow {name}, you need to sign into your account on whatever Mastodon server you use.'
-              values={{ name }}
-            />
-          ) : (
-            <FormattedMessage
-              id='interaction_modal.action'
-              defaultMessage="To interact with {name}'s post, you need to sign into your account on whatever Mastodon server you use."
-              values={{ name }}
-            />
-          )}
+          <FormattedMessage
+            id='interaction_modal.action'
+            defaultMessage="To interact with {name}'s post, you need to sign into your account on whatever Mastodon server you use."
+            values={{ name }}
+          />
         </p>
       </div>
 
-      <LoginForm resourceUrl={url} intent={intent} />
+      <LoginForm resourceUrl={url} />
 
       <p>
         <FormattedMessage

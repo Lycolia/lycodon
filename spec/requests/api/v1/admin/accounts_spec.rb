@@ -3,7 +3,11 @@
 require 'rails_helper'
 
 RSpec.describe 'Accounts' do
-  include_context 'with API authentication', user_fabricator: :admin_user, oauth_scopes: 'admin:read:accounts admin:write:accounts'
+  let(:role)    { UserRole.find_by(name: 'Admin') }
+  let(:user)    { Fabricate(:user, role: role) }
+  let(:scopes)  { 'admin:read:accounts admin:write:accounts' }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 
   describe 'GET /api/v1/admin/accounts' do
     subject do

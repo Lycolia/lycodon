@@ -6,7 +6,6 @@ import { showAlertForError } from 'mastodon/actions/alerts';
 import api from 'mastodon/api';
 import { Button } from 'mastodon/components/button';
 import { CopyPasteText } from 'mastodon/components/copy_paste_text';
-import { NavigationFocusTarget } from 'mastodon/components/navigation_focus_target';
 import { useAppDispatch } from 'mastodon/store';
 
 interface OEmbedResponse {
@@ -77,9 +76,9 @@ const EmbedModal: React.FC<{
         <Button onClick={onClose}>
           <FormattedMessage id='report.close' defaultMessage='Done' />
         </Button>
-        <NavigationFocusTarget as='h1' className='dialog-modal__header__title'>
+        <span className='dialog-modal__header__title'>
           <FormattedMessage id='status.embed' defaultMessage='Get embed code' />
-        </NavigationFocusTarget>
+        </span>
         <Button secondary onClick={onClose}>
           <FormattedMessage
             id='confirmation_modal.cancel'

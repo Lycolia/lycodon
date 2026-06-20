@@ -35,9 +35,6 @@ const messages = defineMessages({
   },
 });
 
-const isPollExpired = (expiresAt: Model.Poll['expires_at']) =>
-  new Date(expiresAt).getTime() < Date.now();
-
 interface PollProps {
   pollId: string;
   status: Status;
@@ -61,7 +58,8 @@ export const Poll: React.FC<PollProps> = ({ pollId, disabled, status }) => {
     if (!poll) {
       return false;
     }
-    return poll.expired || isPollExpired(poll.expires_at);
+    const expiresAt = poll.expires_at;
+    return poll.expired || new Date(expiresAt).getTime() < Date.now();
   }, [poll]);
   const timeRemaining = useMemo(() => {
     if (!poll) {
@@ -70,7 +68,7 @@ export const Poll: React.FC<PollProps> = ({ pollId, disabled, status }) => {
     if (expired) {
       return intl.formatMessage(messages.closed);
     }
-    return <RelativeTimestamp hasFuture timestamp={poll.expires_at} />;
+    return <RelativeTimestamp timestamp={poll.expires_at} futureDate />;
   }, [expired, intl, poll]);
   const votesCount = useMemo(() => {
     if (!poll) {
@@ -110,7 +108,6 @@ export const Poll: React.FC<PollProps> = ({ pollId, disabled, status }) => {
         openModal({
           modalType: 'INTERACTION',
           modalProps: {
-            intent: 'vote',
             accountId: status.getIn(['account', 'id']),
             url: status.get('uri'),
           },
@@ -174,14 +171,13 @@ export const Poll: React.FC<PollProps> = ({ pollId, disabled, status }) => {
             className='button button-secondary'
             disabled={voteDisabled}
             onClick={handleVote}
-            type='button'
           >
             <FormattedMessage id='poll.vote' defaultMessage='Vote' />
           </button>
         )}
         {!showResults && (
           <>
-            <button className='poll__link' onClick={handleReveal} type='button'>
+            <button className='poll__link' onClick={handleReveal}>
               <FormattedMessage id='poll.reveal' defaultMessage='See results' />
             </button>{' '}
             ·{' '}
@@ -189,11 +185,7 @@ export const Poll: React.FC<PollProps> = ({ pollId, disabled, status }) => {
         )}
         {showResults && !disabled && (
           <>
-            <button
-              className='poll__link'
-              onClick={handleRefresh}
-              type='button'
-            >
+            <button className='poll__link' onClick={handleRefresh}>
               <FormattedMessage id='poll.refresh' defaultMessage='Refresh' />
             </button>{' '}
             ·{' '}

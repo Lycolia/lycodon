@@ -1,28 +1,10 @@
-import {
-  apiRequestPost,
-  apiRequestGet,
-  apiRequestDelete,
-  apiRequestPatch,
-} from 'mastodon/api';
+import { apiRequestPost, apiRequestGet } from 'mastodon/api';
 import type {
   ApiAccountJSON,
   ApiFamiliarFollowersJSON,
 } from 'mastodon/api_types/accounts';
 import type { ApiRelationshipJSON } from 'mastodon/api_types/relationships';
-import type {
-  ApiFeaturedTagJSON,
-  ApiHashtagJSON,
-} from 'mastodon/api_types/tags';
-
-import type {
-  ApiProfileJSON,
-  ApiProfileUpdateParams,
-} from '../api_types/profile';
-
-export const apiGetAccounts = (ids: string[]) =>
-  apiRequestGet<ApiAccountJSON[]>('v1/accounts', {
-    id: ids,
-  });
+import type { ApiHashtagJSON } from 'mastodon/api_types/tags';
 
 export const apiSubmitAccountNote = (id: string, value: string) =>
   apiRequestPost<ApiRelationshipJSON>(`v1/accounts/${id}/note`, {
@@ -48,19 +30,7 @@ export const apiRemoveAccountFromFollowers = (id: string) =>
   );
 
 export const apiGetFeaturedTags = (id: string) =>
-  apiRequestGet<ApiHashtagJSON[]>(`v1/accounts/${id}/featured_tags`);
-
-export const apiGetCurrentFeaturedTags = () =>
-  apiRequestGet<ApiFeaturedTagJSON[]>(`v1/featured_tags`);
-
-export const apiPostFeaturedTag = (name: string) =>
-  apiRequestPost<ApiFeaturedTagJSON>('v1/featured_tags', { name });
-
-export const apiDeleteFeaturedTag = (id: string) =>
-  apiRequestDelete(`v1/featured_tags/${id}`);
-
-export const apiGetTagSuggestions = () =>
-  apiRequestGet<ApiHashtagJSON[]>('v1/featured_tags/suggestions');
+  apiRequestGet<ApiHashtagJSON>(`v1/accounts/${id}/featured_tags`);
 
 export const apiGetEndorsedAccounts = (id: string) =>
   apiRequestGet<ApiAccountJSON>(`v1/accounts/${id}/endorsements`);
@@ -69,17 +39,3 @@ export const apiGetFamiliarFollowers = (id: string) =>
   apiRequestGet<ApiFamiliarFollowersJSON>('v1/accounts/familiar_followers', {
     id,
   });
-
-export const apiGetProfile = () => apiRequestGet<ApiProfileJSON>('v1/profile');
-
-export const apiPatchProfile = (params: ApiProfileUpdateParams | FormData) =>
-  apiRequestPatch<ApiProfileJSON>('v1/profile', params);
-
-export const apiDeleteProfileAvatar = () =>
-  apiRequestDelete('v1/profile/avatar');
-
-export const apiDeleteProfileHeader = () =>
-  apiRequestDelete('v1/profile/header');
-
-export const apiSubscribeByEmail = (id: string, email: string) =>
-  apiRequestPost(`v1/accounts/${id}/email_subscriptions`, { email });

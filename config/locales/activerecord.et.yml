@@ -32,12 +32,6 @@ et:
           attributes:
             url:
               invalid: pole sobiv URL
-        collection:
-          attributes:
-            collection_items:
-              too_many: on liiga palju, pole lubatud enam, kui %{count}
-            tag:
-              unusable: pole võimalik kasutada
         doorkeeper/application:
           attributes:
             website:

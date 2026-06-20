@@ -28,6 +28,6 @@ class ActivityPub::MoveDistributionWorker
   end
 
   def signed_payload
-    @signed_payload ||= serialize_payload(@migration, ActivityPub::MoveSerializer, signer: @account).to_json
+    @signed_payload ||= Oj.dump(serialize_payload(@migration, ActivityPub::MoveSerializer, signer: @account))
   end
 end

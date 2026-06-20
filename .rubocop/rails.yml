@@ -24,6 +24,3 @@ Rails/RakeEnvironment:
 
 Rails/SkipsModelValidations:
   Enabled: false
-
-Rails/StrongParametersExpect:
-  Enabled: false

@@ -31,8 +31,7 @@ class Api::V1::Notifications::PoliciesController < Api::BaseController
       :filter_not_following,
       :filter_not_followers,
       :filter_new_accounts,
-      :filter_private_mentions,
-      :filter_bots
+      :filter_private_mentions
     )
   end
 end

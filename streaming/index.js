@@ -3,7 +3,6 @@
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
-import querystring from 'node:querystring';
 import url from 'node:url';
 
 import cors from 'cors';
@@ -31,8 +30,7 @@ const dotenvFilePath = path.resolve(
 );
 
 dotenv.config({
-  path: dotenvFilePath,
-  quiet: true,
+  path: dotenvFilePath
 });
 
 initializeLogLevel(process.env, environment);
@@ -92,19 +90,6 @@ const parseJSON = (json, req) => {
     return null;
   }
 };
-
-/**
- * Parses the query string from a request object.
- * @param {Request?} req
- */
-const parseQueryString = (req) => {
-  if (!req?.url) {
-    return undefined;
-  }
-  const url = new URL(req.url, "http://./");
-  const qs = url.search.slice(1);
-  return querystring.parse(qs);
-}
 
 // Used for priming the counters/gauges for the various metrics that are
 // per-channel
@@ -390,7 +375,6 @@ const startServer = async () => {
     req.scopes = result.rows[0].scopes.split(' ');
     req.accountId = result.rows[0].account_id;
     req.chosenLanguages = result.rows[0].chosen_languages;
-    req.permissions = result.rows[0].permissions;
 
     return {
       accessTokenId: result.rows[0].id,
@@ -407,8 +391,8 @@ const startServer = async () => {
    */
   const accountFromRequest = (req) => new Promise((resolve, reject) => {
     const authorization = req.headers.authorization;
-    const query         = parseQueryString(req);
-    const accessToken   = query?.access_token || req.headers['sec-websocket-protocol'];
+    const location      = req.url ? url.parse(req.url, true) : undefined;
+    const accessToken   = location?.query.access_token || req.headers['sec-websocket-protocol'];
 
     if (!authorization && !accessToken) {
       reject(new AuthenticationError('Missing access token'));
@@ -616,13 +600,13 @@ const startServer = async () => {
 
   /**
    * @param {string} kind
-   * @param {Request} req
+   * @param {ResolvedAccount} account
    * @returns {Promise.<{ localAccess: boolean, remoteAccess: boolean }>}
    */
-  const getFeedAccessSettings = async (kind, req) => {
+  const getFeedAccessSettings = async (kind, account) => {
     const access = { localAccess: true, remoteAccess: true };
 
-    if (req.permissions & PERMISSION_VIEW_FEEDS) {
+    if (account.permissions & PERMISSION_VIEW_FEEDS) {
       return access;
     }
 
@@ -934,7 +918,7 @@ const startServer = async () => {
 
     res.write(':)\n');
 
-    const heartbeat = setInterval(() => res.write(':thump\n\n'), 15000);
+    const heartbeat = setInterval(() => res.write(':thump\n'), 15000);
 
     req.on('close', () => {
       req.log.info({ accountId: req.accountId }, `Ending stream`);
@@ -1012,7 +996,7 @@ const startServer = async () => {
   // @ts-expect-error
   api.use(errorMiddleware);
 
-  api.get('/api/v1/streaming/*splat', (req, res) => {
+  api.get('/api/v1/streaming/*', (req, res) => {
     // @ts-expect-error
     const channelName = channelNameFromPath(req);
 
@@ -1314,8 +1298,8 @@ const startServer = async () => {
    * @param {import('pino').Logger} log
    */
   function onConnection(ws, req, log) {
-    // In case the handler throws, which would terminate the connection,
-    // increment the connected clients metric straight away when it establishes
+    // Note: url.parse could throw, which would terminate the connection, so we
+    // increment the connected clients metric straight away when we establish
     // the connection, without waiting:
     metrics.connectedClients.labels({ type: 'websocket' }).inc();
 
@@ -1397,10 +1381,11 @@ const startServer = async () => {
 
     subscribeWebsocketToSystemChannel(session);
 
-    // Parse the URL for the connection arguments (if supplied)
-    const query = parseQueryString(req);
-    if (query && query.stream) {
-      subscribeWebsocketToChannel(session, firstParam(query.stream), query);
+    // Parse the URL for the connection arguments (if supplied), url.parse can throw:
+    const location = req.url && url.parse(req.url, true);
+
+    if (location && location.query.stream) {
+      subscribeWebsocketToChannel(session, firstParam(location.query.stream), location.query);
     }
   }
 

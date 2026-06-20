@@ -64,7 +64,7 @@ class SearchService < BaseService
   end
 
   def default_results
-    { accounts: [], hashtags: [], statuses: [], collections: [] }
+    { accounts: [], hashtags: [], statuses: [] }
   end
 
   def url_query?

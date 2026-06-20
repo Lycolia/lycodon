@@ -23,6 +23,6 @@ class ActivityPub::UpdateDistributionWorker < ActivityPub::RawDistributionWorker
   end
 
   def payload
-    @payload ||= serialize_payload(@account, ActivityPub::UpdateActorSerializer, signer: @account, sign_with: @options[:sign_with]).to_json
+    @payload ||= Oj.dump(serialize_payload(@account, ActivityPub::UpdateSerializer, signer: @account, sign_with: @options[:sign_with]))
   end
 end

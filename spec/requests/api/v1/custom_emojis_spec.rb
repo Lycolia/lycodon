@@ -3,7 +3,9 @@
 require 'rails_helper'
 
 RSpec.describe 'Custom Emojis' do
-  include_context 'with API authentication'
+  let(:user)    { Fabricate(:user) }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id) }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 
   describe 'GET /api/v1/custom_emojis' do
     before do

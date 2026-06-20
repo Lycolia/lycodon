@@ -10,9 +10,7 @@ RSpec.describe BackupService do
   let!(:status)         { Fabricate(:status, account: user.account, text: 'Hello', visibility: :public, media_attachments: [attachment]) }
   let!(:private_status) { Fabricate(:status, account: user.account, text: 'secret', visibility: :private) }
   let!(:favourite)      { Fabricate(:favourite, account: user.account) }
-  let!(:more_favourite) { Fabricate(:favourite, account: user.account) }
   let!(:bookmark)       { Fabricate(:bookmark, account: user.account) }
-  let!(:more_bookmark)  { Fabricate(:bookmark, account: user.account) }
   let!(:backup)         { Fabricate(:backup, user: user) }
 
   def read_zip_file(backup, filename)
@@ -58,7 +56,7 @@ RSpec.describe BackupService do
 
   def expect_outbox_export
     body = export_json_raw(:outbox)
-    json = JSON.parse(body)
+    json = Oj.load(body)
 
     aggregate_failures do
       expect(body.scan('@context').count).to eq 1
@@ -73,27 +71,21 @@ RSpec.describe BackupService do
   end
 
   def expect_likes_export
-    expect(export_json(:likes).deep_symbolize_keys)
-      .to include(
-        id: 'likes.json',
-        type: 'OrderedCollection',
-        orderedItems: contain_exactly(
-          ActivityPub::TagManager.instance.uri_for(favourite.status),
-          ActivityPub::TagManager.instance.uri_for(more_favourite.status)
-        )
-      )
+    json = export_json(:likes)
+
+    aggregate_failures do
+      expect(json['type']).to eq 'OrderedCollection'
+      expect(json['orderedItems']).to eq [ActivityPub::TagManager.instance.uri_for(favourite.status)]
+    end
   end
 
   def expect_bookmarks_export
-    expect(export_json(:bookmarks).deep_symbolize_keys)
-      .to include(
-        id: 'bookmarks.json',
-        type: 'OrderedCollection',
-        orderedItems: contain_exactly(
-          ActivityPub::TagManager.instance.uri_for(bookmark.status),
-          ActivityPub::TagManager.instance.uri_for(more_bookmark.status)
-        )
-      )
+    json = export_json(:bookmarks)
+
+    aggregate_failures do
+      expect(json['type']).to eq 'OrderedCollection'
+      expect(json['orderedItems']).to eq [ActivityPub::TagManager.instance.uri_for(bookmark.status)]
+    end
   end
 
   def export_json_raw(type)
@@ -101,7 +93,7 @@ RSpec.describe BackupService do
   end
 
   def export_json(type)
-    JSON.parse(export_json_raw(type))
+    Oj.load(export_json_raw(type))
   end
 
   def include_create_item(status)

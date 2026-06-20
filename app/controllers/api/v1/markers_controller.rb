@@ -32,7 +32,13 @@ class Api::V1::MarkersController < Api::BaseController
   private
 
   def serialize_map(map)
-    map.transform_values { |value| ActiveModelSerializers::SerializableResource.new(value, serializer: REST::MarkerSerializer) }
+    serialized = {}
+
+    map.each_pair do |key, value|
+      serialized[key] = ActiveModelSerializers::SerializableResource.new(value, serializer: REST::MarkerSerializer).as_json
+    end
+
+    Oj.dump(serialized)
   end
 
   def resource_params

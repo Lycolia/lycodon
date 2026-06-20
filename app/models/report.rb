@@ -5,23 +5,25 @@
 # Table name: reports
 #
 #  id                         :bigint(8)        not null, primary key
-#  action_taken_at            :datetime
-#  category                   :integer          default("other"), not null
-#  comment                    :text             default(""), not null
-#  forwarded                  :boolean
-#  rule_ids                   :bigint(8)        is an Array
 #  status_ids                 :bigint(8)        default([]), not null, is an Array
-#  uri                        :string
+#  comment                    :text             default(""), not null
 #  created_at                 :datetime         not null
 #  updated_at                 :datetime         not null
 #  account_id                 :bigint(8)        not null
 #  action_taken_by_account_id :bigint(8)
-#  application_id             :bigint(8)
-#  assigned_account_id        :bigint(8)
 #  target_account_id          :bigint(8)        not null
+#  assigned_account_id        :bigint(8)
+#  uri                        :string
+#  forwarded                  :boolean
+#  category                   :integer          default("other"), not null
+#  action_taken_at            :datetime
+#  rule_ids                   :bigint(8)        is an Array
+#  application_id             :bigint(8)
 #
 
 class Report < ApplicationRecord
+  self.ignored_columns += %w(action_taken)
+
   include Paginable
   include RateLimitable
 
@@ -38,8 +40,6 @@ class Report < ApplicationRecord
     belongs_to :assigned_account, optional: true
   end
 
-  has_many :collection_reports, dependent: :delete_all
-  has_many :collections, through: :collection_reports
   has_many :notes, class_name: 'ReportNote', inverse_of: :report, dependent: :destroy
   has_many :notifications, as: :activity, dependent: :destroy
 
@@ -66,7 +66,7 @@ class Report < ApplicationRecord
     violation: 2_000,
   }
 
-  before_validation :set_uri, on: :create
+  before_validation :set_uri, only: :create
 
   after_create_commit :trigger_create_webhooks
   after_update_commit :trigger_update_webhooks

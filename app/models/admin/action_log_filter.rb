@@ -82,8 +82,6 @@ class Admin::ActionLogFilter
     destroy_username_block: { target_type: 'UsernameBlock', action: 'destroy' }.freeze,
   }.freeze
 
-  IGNORED_PARAMS = %w(page).freeze
-
   attr_reader :params
 
   def initialize(params)
@@ -94,7 +92,7 @@ class Admin::ActionLogFilter
     scope = latest_action_logs.includes(:target, :account)
 
     params.each do |key, value|
-      next if IGNORED_PARAMS.include?(key.to_s)
+      next if key.to_s == 'page'
 
       scope.merge!(scope_for(key.to_s, value.to_s.strip)) if value.present?
     end

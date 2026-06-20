@@ -2,11 +2,11 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
+import Overlay from 'react-overlays/Overlay';
 import type {
   OffsetValue,
   UsePopperOptions,
 } from 'react-overlays/esm/usePopper';
-import Overlay from 'react-overlays/Overlay';
 
 import { HoverCardAccount } from 'mastodon/components/hover_card_account';
 import { useTimeout } from 'mastodon/hooks/useTimeout';
@@ -14,10 +14,6 @@ import { useTimeout } from 'mastodon/hooks/useTimeout';
 const offset = [-12, 4] as OffsetValue;
 const enterDelay = 750;
 const leaveDelay = 150;
-// Only open the card if the mouse was moved within this time,
-// to avoid triggering the card without intentional mouse movement
-// (e.g. when content changed underneath the mouse cursor)
-const activeMovementThreshold = 150;
 const popperConfig = { strategy: 'fixed' } as UsePopperOptions;
 
 const isHoverCardAnchor = (element: HTMLElement) =>
@@ -30,9 +26,8 @@ export const HoverCardController: React.FC = () => {
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [setLeaveTimeout, cancelLeaveTimeout] = useTimeout();
   const [setEnterTimeout, cancelEnterTimeout, delayEnterTimeout] = useTimeout();
-  const [setMoveTimeout, cancelMoveTimeout] = useTimeout();
   const [setScrollTimeout] = useTimeout();
-  const lastMouseMoveTime = useRef<number>(0);
+  const location = useLocation();
 
   const handleClose = useCallback(() => {
     cancelEnterTimeout();
@@ -41,16 +36,12 @@ export const HoverCardController: React.FC = () => {
     setAnchor(null);
   }, [cancelEnterTimeout, cancelLeaveTimeout, setOpen, setAnchor]);
 
-  const location = useLocation();
-  const [previousLocation, setPreviousLocation] = useState(location);
-  if (location !== previousLocation) {
-    setPreviousLocation(location);
+  useEffect(() => {
     handleClose();
-  }
+  }, [handleClose, location]);
 
   useEffect(() => {
     let isScrolling = false;
-    let isUsingTouch = false;
     let currentAnchor: HTMLElement | null = null;
     let currentTitle: string | null = null;
 
@@ -69,12 +60,6 @@ export const HoverCardController: React.FC = () => {
       setAccountId(undefined);
     };
 
-    const handleTouchStart = () => {
-      // Keeping track of touch events to prevent the
-      // hover card from being displayed on touch devices
-      isUsingTouch = true;
-    };
-
     const handleMouseEnter = (e: MouseEvent) => {
       const { target } = e;
 
@@ -84,40 +69,28 @@ export const HoverCardController: React.FC = () => {
         return;
       }
 
-      // This 0ms timeout is needed to push processing of this code
-      // until after the mousemove event was run, in order to be able
-      // to track the most recent value of lastMouseMoveTime.current
-      setTimeout(() => {
-        // Check if mouse moved within the active movement threshold
-        const timeSinceLastMove = Date.now() - lastMouseMoveTime.current;
-        const hasRecentMovement = timeSinceLastMove < activeMovementThreshold;
+      // We've entered an anchor
+      if (!isScrolling && isHoverCardAnchor(target)) {
+        cancelLeaveTimeout();
 
-        // Bail out if we're scrolling, a touch is active,
-        // or if there was no active mouse movement
-        if (isScrolling || !hasRecentMovement || isUsingTouch) {
-          return;
-        }
+        currentAnchor?.removeAttribute('aria-describedby');
+        currentAnchor = target;
 
-        // We've entered an anchor
-        if (isHoverCardAnchor(target)) {
-          cancelLeaveTimeout();
+        currentTitle = target.getAttribute('title');
+        target.removeAttribute('title');
 
-          currentAnchor?.removeAttribute('aria-describedby');
-          currentAnchor = target;
+        setEnterTimeout(() => {
+          open(target);
+        }, enterDelay);
+      }
 
-          currentTitle = target.getAttribute('title');
-          target.removeAttribute('title');
-
-          setEnterTimeout(() => {
-            open(target);
-          }, enterDelay);
-        }
-
-        // We've entered the hover card
-        if (target === currentAnchor || target === cardRef.current) {
-          cancelLeaveTimeout();
-        }
-      }, 0);
+      // We've entered the hover card
+      if (
+        !isScrolling &&
+        (target === currentAnchor || target === cardRef.current)
+      ) {
+        cancelLeaveTimeout();
+      }
     };
 
     const handleMouseLeave = (e: MouseEvent) => {
@@ -153,25 +126,9 @@ export const HoverCardController: React.FC = () => {
       setScrollTimeout(handleScrollEnd, 100);
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isUsingTouch) {
-        isUsingTouch = false;
-      }
-
-      const hasMoved =
-        Math.max(Math.abs(e.movementX), Math.abs(e.movementY)) > 0;
-
-      if (!hasMoved) {
-        return;
-      }
-
+    const handleMouseMove = () => {
       delayEnterTimeout(enterDelay);
-      lastMouseMoveTime.current = Date.now();
     };
-
-    document.body.addEventListener('touchstart', handleTouchStart, {
-      passive: true,
-    });
 
     document.body.addEventListener('mouseenter', handleMouseEnter, {
       passive: true,
@@ -194,7 +151,6 @@ export const HoverCardController: React.FC = () => {
     });
 
     return () => {
-      document.body.removeEventListener('touchstart', handleTouchStart);
       document.body.removeEventListener('mouseenter', handleMouseEnter);
       document.body.removeEventListener('mousemove', handleMouseMove);
       document.body.removeEventListener('mouseleave', handleMouseLeave);
@@ -210,8 +166,6 @@ export const HoverCardController: React.FC = () => {
     setOpen,
     setAccountId,
     setAnchor,
-    setMoveTimeout,
-    cancelMoveTimeout,
   ]);
 
   return (

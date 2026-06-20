@@ -2,8 +2,7 @@
 
 class REST::ReportSerializer < ActiveModel::Serializer
   attributes :id, :action_taken, :action_taken_at, :category, :comment,
-             :forwarded, :created_at, :status_ids, :rule_ids,
-             :collection_ids
+             :forwarded, :created_at, :status_ids, :rule_ids
 
   has_one :target_account, serializer: REST::AccountSerializer
 
@@ -17,9 +16,5 @@ class REST::ReportSerializer < ActiveModel::Serializer
 
   def rule_ids
     object&.rule_ids&.map(&:to_s)
-  end
-
-  def collection_ids
-    object.collection_ids.map(&:to_s)
   end
 end

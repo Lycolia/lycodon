@@ -6,20 +6,10 @@ RSpec.describe 'Accounts show response' do
   let(:account) { Fabricate(:account) }
 
   context 'with numeric-based identifiers' do
-    context 'with JSON format' do
-      it 'returns http success' do
-        get "/ap/users/#{account.id}", headers: { 'ACCEPT' => 'application/json' }
+    it 'returns http success' do
+      get "/ap/users/#{account.id}"
 
-        expect(response).to have_http_status(200)
-      end
-    end
-
-    context 'with HTML format' do
-      it 'redirects to success' do
-        get "/ap/users/#{account.id}", as: 'html'
-
-        expect(response).to redirect_to("/@#{account.username}")
-      end
+      expect(response).to have_http_status(200)
     end
   end
 

@@ -6,13 +6,13 @@
 #
 #  id                  :bigint(8)        not null, primary key
 #  domain              :string           default(""), not null
-#  icon_content_type   :string
 #  icon_file_name      :string
+#  icon_content_type   :string
 #  icon_file_size      :bigint(8)
 #  icon_updated_at     :datetime
-#  requested_review_at :datetime
-#  reviewed_at         :datetime
 #  trendable           :boolean
+#  reviewed_at         :datetime
+#  requested_review_at :datetime
 #  created_at          :datetime         not null
 #  updated_at          :datetime         not null
 #
@@ -36,6 +36,7 @@ class PreviewCardProvider < ApplicationRecord
   scope :not_trendable, -> { where(trendable: false) }
 
   def self.matching_domain(domain)
-    where(domain: domain_variants(domain)).by_domain_length.first
+    segments = domain.split('.')
+    where(domain: segments.map.with_index { |_, i| segments[i..].join('.') }).by_domain_length.first
   end
 end

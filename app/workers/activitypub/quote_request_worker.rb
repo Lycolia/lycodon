@@ -17,6 +17,6 @@ class ActivityPub::QuoteRequestWorker < ActivityPub::RawDistributionWorker
   end
 
   def payload
-    @payload ||= serialize_payload(@quote, ActivityPub::QuoteRequestSerializer, signer: @account, allow_post_inlining: true).to_json
+    @payload ||= Oj.dump(serialize_payload(@quote, ActivityPub::QuoteRequestSerializer, signer: @account, allow_post_inlining: true))
   end
 end

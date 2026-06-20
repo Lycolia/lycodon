@@ -5,28 +5,17 @@ require 'rails_helper'
 RSpec.describe TagSearchService do
   describe '#call' do
     let!(:one) { Fabricate(:tag, name: 'one') }
-    let(:results) { subject.call('#one', limit: 5) }
 
     before { Fabricate(:tag, name: 'two') }
 
-    context 'with postgres search' do
-      it 'runs a search for tags' do
-        expect(results)
-          .to have_attributes(
-            size: 1,
-            first: eq(one)
-          )
-      end
-    end
+    it 'runs a search for tags' do
+      results = subject.call('#one', limit: 5)
 
-    context 'when elasticsearch is enabled', :search do
-      it 'runs a search for tags' do
-        expect(results)
-          .to have_attributes(
-            size: 1,
-            first: eq(one)
-          )
-      end
+      expect(results)
+        .to have_attributes(
+          size: 1,
+          first: eq(one)
+        )
     end
   end
 end

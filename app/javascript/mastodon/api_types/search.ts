@@ -1,5 +1,4 @@
 import type { ApiAccountJSON } from './accounts';
-import type { ApiCollectionJSON } from './collections';
 import type { ApiStatusJSON } from './statuses';
 import type { ApiHashtagJSON } from './tags';
 
@@ -9,5 +8,4 @@ export interface ApiSearchResultsJSON {
   accounts: ApiAccountJSON[];
   statuses: ApiStatusJSON[];
   hashtags: ApiHashtagJSON[];
-  collections: ApiCollectionJSON[];
 }

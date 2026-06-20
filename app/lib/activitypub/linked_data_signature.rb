@@ -12,7 +12,6 @@ class ActivityPub::LinkedDataSignature
 
   def verify_actor!
     return unless @json['signature'].is_a?(Hash)
-    return if unsupported_jsonld_features?(@json)
 
     type        = @json['signature']['type']
     creator_uri = @json['signature']['creator']
@@ -20,15 +19,16 @@ class ActivityPub::LinkedDataSignature
 
     return unless type == 'RsaSignature2017'
 
-    keypair = Keypair.from_keyid(creator_uri)
-    keypair = ActivityPub::FetchRemoteKeyService.new.call(creator_uri) if keypair&.public_key.blank?
-    return if keypair.nil? || !keypair.usable?
+    creator = ActivityPub::TagManager.instance.uri_to_actor(creator_uri)
+    creator = ActivityPub::FetchRemoteKeyService.new.call(creator_uri) if creator&.public_key.blank?
+
+    return if creator.nil?
 
     options_hash   = hash(@json['signature'].without('type', 'id', 'signatureValue').merge('@context' => CONTEXT))
     document_hash  = hash(@json.without('signature'))
     to_be_verified = options_hash + document_hash
 
-    keypair.actor if keypair.keypair.public_key.verify(OpenSSL::Digest.new('SHA256'), Base64.decode64(signature), to_be_verified)
+    creator if creator.keypair.public_key.verify(OpenSSL::Digest.new('SHA256'), Base64.decode64(signature), to_be_verified)
   rescue OpenSSL::PKey::RSAError
     false
   end

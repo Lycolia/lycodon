@@ -7,7 +7,6 @@ import classNames from 'classnames';
 import RepeatIcon from '@/material-icons/400-24px/repeat.svg?react';
 import { Button } from 'mastodon/components/button';
 import { Icon } from 'mastodon/components/icon';
-import { NavigationFocusTarget } from 'mastodon/components/navigation_focus_target';
 import PrivacyDropdown from 'mastodon/features/compose/components/privacy_dropdown';
 import { EmbeddedStatus } from 'mastodon/features/notifications_v2/components/embedded_status';
 import type { Status, StatusVisibility } from 'mastodon/models/status';
@@ -53,10 +52,7 @@ export const BoostModal: React.FC<{
   }, [onClose]);
 
   const findContainer = useCallback(
-    () =>
-      document.getElementsByClassName(
-        'modal-root__container',
-      )[0] as HTMLDivElement,
+    () => document.getElementsByClassName('modal-root__container')[0],
     [],
   );
 
@@ -69,7 +65,7 @@ export const BoostModal: React.FC<{
           </div>
 
           <div>
-            <NavigationFocusTarget as='h1'>
+            <h1>
               {status.get('reblogged') ? (
                 <FormattedMessage
                   id='boost_modal.undo_reblog'
@@ -81,7 +77,7 @@ export const BoostModal: React.FC<{
                   defaultMessage='Boost post?'
                 />
               )}
-            </NavigationFocusTarget>
+            </h1>
             <div>
               <FormattedMessage
                 id='boost_modal.combo'
@@ -117,7 +113,7 @@ export const BoostModal: React.FC<{
 
           <div className='spacer' />
 
-          <button onClick={handleCancel} className='link-button' type='button'>
+          <button onClick={handleCancel} className='link-button'>
             <FormattedMessage
               id='confirmation_modal.cancel'
               defaultMessage='Cancel'

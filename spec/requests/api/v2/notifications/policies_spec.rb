@@ -34,7 +34,6 @@ RSpec.describe 'Policies' do
           for_new_accounts: 'accept',
           for_private_mentions: 'filter',
           for_limited_accounts: 'filter',
-          for_bots: 'accept',
           summary: a_hash_including(
             pending_requests_count: 1,
             pending_notifications_count: 0
@@ -67,21 +66,11 @@ RSpec.describe 'Policies' do
         for_new_accounts: 'accept',
         for_private_mentions: 'filter',
         for_limited_accounts: 'drop',
-        for_bots: 'accept',
         summary: a_hash_including(
           pending_requests_count: 0,
           pending_notifications_count: 0
         )
       )
-    end
-  end
-
-  describe 'updating bots policy' do
-    it 'accepts for_bots parameter' do
-      put '/api/v2/notifications/policy', headers: headers, params: { for_bots: 'filter' }
-
-      expect(response).to have_http_status(200)
-      expect(response.parsed_body).to include(for_bots: 'filter')
     end
   end
 end

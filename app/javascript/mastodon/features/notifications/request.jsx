@@ -3,7 +3,7 @@ import { useRef, useCallback, useEffect } from 'react';
 
 import { defineMessages, useIntl, FormattedMessage } from 'react-intl';
 
-import { Helmet } from '@unhead/react/helmet';
+import { Helmet } from 'react-helmet';
 
 import { useSelector, useDispatch } from 'react-redux';
 

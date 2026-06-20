@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 
-import { defineMessages, FormattedMessage } from 'react-intl';
+import { defineMessages, injectIntl, FormattedMessage } from 'react-intl';
 
-import { Helmet } from '@unhead/react/helmet';
+import { Helmet } from 'react-helmet';
 
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import ImmutablePureComponent from 'react-immutable-pure-component';
@@ -13,7 +13,6 @@ import { debounce } from 'lodash';
 import RefreshIcon from '@/material-icons/400-24px/refresh.svg?react';
 import { Account } from 'mastodon/components/account';
 import { Icon }  from 'mastodon/components/icon';
-import { injectIntl } from '@/mastodon/components/intl';
 
 import { fetchReblogs, expandReblogs } from '../../actions/interactions';
 import ColumnHeader from '../../components/column_header';
@@ -43,7 +42,7 @@ class Reblogs extends ImmutablePureComponent {
     intl: PropTypes.object.isRequired,
   };
 
-  componentDidMount () {
+  UNSAFE_componentWillMount () {
     if (!this.props.accountIds) {
       this.props.dispatch(fetchReblogs(this.props.params.statusId));
     }

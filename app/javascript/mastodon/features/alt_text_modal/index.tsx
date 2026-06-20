@@ -22,7 +22,6 @@ import { changeUploadCompose } from 'mastodon/actions/compose_typed';
 import { Button } from 'mastodon/components/button';
 import { GIFV } from 'mastodon/components/gifv';
 import { LoadingIndicator } from 'mastodon/components/loading_indicator';
-import { NavigationFocusTarget } from 'mastodon/components/navigation_focus_target';
 import { Skeleton } from 'mastodon/components/skeleton';
 import { Audio } from 'mastodon/features/audio';
 import { CharacterCounter } from 'mastodon/features/compose/components/character_counter';
@@ -55,8 +54,7 @@ const messages = defineMessages({
   },
 });
 
-// TODO: use `description_limit` from the `/api/v2/instance` response
-const MAX_LENGTH = 10000;
+const MAX_LENGTH = 1500;
 
 type FocalPoint = [number, number];
 
@@ -103,9 +101,8 @@ const Preview: React.FC<{
   position: FocalPoint;
   onPositionChange: (arg0: FocalPoint) => void;
 }> = ({ mediaId, position, onPositionChange }) => {
+  const draggingRef = useRef<boolean>(false);
   const nodeRef = useRef<HTMLImageElement | HTMLVideoElement | null>(null);
-
-  const [dragging, setDragging] = useState<'started' | 'moving' | null>(null);
 
   const [x, y] = position;
   const style = useSpring({
@@ -113,7 +110,7 @@ const Preview: React.FC<{
       left: `${x * 100}%`,
       top: `${y * 100}%`,
     },
-    immediate: dragging === 'moving',
+    immediate: draggingRef.current,
   });
   const media = useAppSelector((state) =>
     (
@@ -125,6 +122,8 @@ const Preview: React.FC<{
   const account = useAppSelector((state) =>
     me ? state.accounts.get(me) : undefined,
   );
+
+  const [dragging, setDragging] = useState(false);
 
   const setRef = useCallback(
     (e: HTMLImageElement | HTMLVideoElement | null) => {
@@ -141,20 +140,20 @@ const Preview: React.FC<{
 
       const handleMouseMove = (e: MouseEvent) => {
         const { x, y } = getPointerPosition(nodeRef.current, e);
-
-        setDragging('moving'); // This will disable the animation for quicker feedback, only do this if the mouse actually moves
+        draggingRef.current = true; // This will disable the animation for quicker feedback, only do this if the mouse actually moves
         onPositionChange([x, y]);
       };
 
       const handleMouseUp = () => {
-        setDragging(null);
+        setDragging(false);
+        draggingRef.current = false;
         document.removeEventListener('mouseup', handleMouseUp);
         document.removeEventListener('mousemove', handleMouseMove);
       };
 
       const { x, y } = getPointerPosition(nodeRef.current, e.nativeEvent);
 
-      setDragging('started');
+      setDragging(true);
       onPositionChange([x, y]);
 
       document.addEventListener('mouseup', handleMouseUp);
@@ -285,7 +284,6 @@ export const AltTextModal = forwardRef<ModalRef, Props & Partial<RestoreProps>>(
     );
     const type = media?.get('type') as string;
     const valid = length(description) <= MAX_LENGTH;
-    const unattached = media?.get('unattached') as boolean | undefined;
 
     const handleDescriptionChange = useCallback(
       (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -413,15 +411,12 @@ export const AltTextModal = forwardRef<ModalRef, Props & Partial<RestoreProps>>(
             )}
           </Button>
 
-          <NavigationFocusTarget
-            as='h1'
-            className='dialog-modal__header__title'
-          >
+          <span className='dialog-modal__header__title'>
             <FormattedMessage
               id='alt_text_modal.add_alt_text'
               defaultMessage='Add alt text'
             />
-          </NavigationFocusTarget>
+          </span>
 
           <Button secondary onClick={onClose}>
             <FormattedMessage
@@ -439,8 +434,7 @@ export const AltTextModal = forwardRef<ModalRef, Props & Partial<RestoreProps>>(
               onPositionChange={handlePositionChange}
             />
 
-            {/* This button is hidden for attached audio/video files, as they are already posted */}
-            {(type === 'audio' || type === 'video') && unattached && (
+            {(type === 'audio' || type === 'video') && (
               <UploadButton
                 onSelectFile={handleThumbnailChange}
                 mimeTypes='image/jpeg,image/png,image/gif,image/heic,image/heif,image/webp,image/avif'
@@ -495,7 +489,6 @@ export const AltTextModal = forwardRef<ModalRef, Props & Partial<RestoreProps>>(
                   className='link-button'
                   onClick={handleDetectClick}
                   disabled={type !== 'image' || isDetecting}
-                  type='button'
                 >
                   <FormattedMessage
                     id='alt_text_modal.add_text_from_image'

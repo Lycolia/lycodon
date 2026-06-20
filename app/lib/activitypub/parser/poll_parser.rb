@@ -3,10 +3,6 @@
 class ActivityPub::Parser::PollParser
   include JsonLdHelper
 
-  # Limit the number of items for performance purposes.
-  # We truncate rather than error out to avoid missing the post entirely.
-  MAX_ITEMS = 500
-
   def initialize(json)
     @json = json
   end
@@ -52,6 +48,6 @@ class ActivityPub::Parser::PollParser
   private
 
   def items
-    (@json['anyOf'] || @json['oneOf'])&.take(MAX_ITEMS)
+    @json['anyOf'] || @json['oneOf']
   end
 end

@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class AccountSearchService < BaseService
-  include SearchStoplight
-
   attr_reader :query, :limit, :offset, :options, :account
 
   MENTION_ONLY_RE = /\A#{Account::MENTION_RE}\z/i
@@ -253,12 +251,12 @@ class AccountSearchService < BaseService
       end
     end
 
-    records = elastic_stoplight_wrapper.run { query_builder.build.limit(limit_for_non_exact_results).offset(offset).objects.compact }
+    records = query_builder.build.limit(limit_for_non_exact_results).offset(offset).objects.compact
 
     ActiveRecord::Associations::Preloader.new(records: records, associations: [:account_stat, { user: :role }]).call
 
     records
-  rescue Stoplight::Error::RedLight, Faraday::ConnectionFailed, Parslet::ParseFailed, Errno::ENETUNREACH, OpenSSL::SSL::SSLError, Elastic::Transport::Transport::Error
+  rescue Faraday::ConnectionFailed, Parslet::ParseFailed, Errno::ENETUNREACH
     nil
   end
 

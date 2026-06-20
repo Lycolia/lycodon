@@ -12,7 +12,7 @@ RSpec.describe 'Admin::IpBlocks' do
       # Visit index page
       visit admin_ip_blocks_path
       expect(page)
-        .to have_text(I18n.t('admin.ip_blocks.title'))
+        .to have_content(I18n.t('admin.ip_blocks.title'))
 
       # Navigate to new
       click_on I18n.t('admin.ip_blocks.add_new')
@@ -22,16 +22,14 @@ RSpec.describe 'Admin::IpBlocks' do
       expect { submit_form }
         .to_not change(IpBlock, :count)
       expect(page)
-        .to have_text(/error below/)
+        .to have_content(/error below/)
 
       # Valid with IP
       fill_in 'ip_block_ip', with: '192.168.1.1'
-      fill_in 'ip_block_comment', with: 'Block explanation'
       expect { submit_form }
         .to change(IpBlock, :count).by(1)
       expect(page)
-        .to have_text(I18n.t('admin.ip_blocks.created_msg'))
-        .and have_text('Block explanation')
+        .to have_content(I18n.t('admin.ip_blocks.created_msg'))
     end
 
     def submit_form
@@ -46,7 +44,7 @@ RSpec.describe 'Admin::IpBlocks' do
 
         click_on button_for_delete
         expect(page)
-          .to have_text(selection_error_text)
+          .to have_content(selection_error_text)
       end
     end
 

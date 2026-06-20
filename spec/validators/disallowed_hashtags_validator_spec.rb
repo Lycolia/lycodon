@@ -3,47 +3,46 @@
 require 'rails_helper'
 
 RSpec.describe DisallowedHashtagsValidator do
-  subject { Fabricate.build :status }
+  let(:disallowed_tags) { [] }
 
-  let(:tag_string) { 'ok #a #b #c then' }
-
-  context 'when local' do
-    before { subject.local = true }
-
-    context 'when reblog? is true' do
-      before { subject.reblog = Fabricate(:status) }
-
-      it { is_expected.to allow_values(nil, tag_string).for(:text) }
+  describe '#validate' do
+    before do
+      disallowed_tags.each { |name| Fabricate(:tag, name: name, usable: false) }
+      described_class.new.validate(status)
     end
 
-    context 'when reblog? is false' do
-      context 'when text does not contain unusable tags' do
-        it { is_expected.to allow_values('text', tag_string).for(:text) }
+    let(:status) { instance_double(Status, errors: errors, local?: local, reblog?: reblog, text: disallowed_tags.map { |x| "##{x}" }.join(' ')) }
+    let(:errors) { instance_double(ActiveModel::Errors, add: nil) }
+
+    context 'with a remote reblog' do
+      let(:local)  { false }
+      let(:reblog) { true }
+
+      it 'does not add errors' do
+        expect(errors).to_not have_received(:add).with(:text, any_args)
       end
+    end
 
-      context 'when text contains unusable tags' do
-        before { Fabricate :tag, name: 'a', usable: false }
+    context 'with a local original status' do
+      let(:local)  { true }
+      let(:reblog) { false }
 
-        it { is_expected.to_not allow_values(tag_string).for(:text).with_message(disallow_message) }
+      context 'when does not contain any disallowed hashtags' do
+        let(:disallowed_tags) { [] }
 
-        def disallow_message
-          I18n.t('statuses.disallowed_hashtags', tags: 'a', count: 1)
+        it 'does not add errors' do
+          expect(errors).to_not have_received(:add).with(:text, any_args)
         end
       end
-    end
-  end
 
-  context 'when remote' do
-    before { subject.local = false }
+      context 'when contains disallowed hashtags' do
+        let(:disallowed_tags) { %w(a b c) }
 
-    context 'when reblog? is true' do
-      before { subject.reblog = Fabricate(:status) }
-
-      it { is_expected.to allow_values(nil, tag_string).for(:text) }
-    end
-
-    context 'when reblog? is false' do
-      it { is_expected.to allow_values('text', tag_string).for(:text) }
+        it 'adds an error' do
+          expect(errors).to have_received(:add)
+            .with(:text, I18n.t('statuses.disallowed_hashtags', tags: disallowed_tags.join(', '), count: disallowed_tags.size))
+        end
+      end
     end
   end
 end

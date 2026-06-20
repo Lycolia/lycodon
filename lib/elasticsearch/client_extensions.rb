@@ -2,9 +2,7 @@
 
 module Elasticsearch
   module ClientExtensions
-    def initialize(arguments = {}, &block)
-      super
-
+    def verify_elasticsearch
       @verified = true
     end
   end

@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react';
 import { defineMessages, useIntl, FormattedMessage } from 'react-intl';
 
 import classNames from 'classnames';
-import { Helmet } from '@unhead/react/helmet';
+import { Helmet } from 'react-helmet';
 import { NavLink } from 'react-router-dom';
 
 import { AccountBio } from '@/mastodon/components/account_bio';
@@ -34,7 +34,7 @@ import { initMuteModal } from 'mastodon/actions/mutes';
 import { initReport } from 'mastodon/actions/reports';
 import { Avatar } from 'mastodon/components/avatar';
 import { Badge, AutomatedBadge, GroupBadge } from 'mastodon/components/badge';
-import { CopyIconButton } from 'mastodon/components/copy_button';
+import { CopyIconButton } from 'mastodon/components/copy_icon_button';
 import {
   FollowersCounter,
   FollowingCounter,
@@ -46,7 +46,9 @@ import { FormattedDateWrapper } from 'mastodon/components/formatted_date';
 import { Icon } from 'mastodon/components/icon';
 import { IconButton } from 'mastodon/components/icon_button';
 import { ShortNumber } from 'mastodon/components/short_number';
-import { AccountNote } from 'mastodon/components/account_header/note';
+import { AccountNote } from 'mastodon/features/account/components/account_note';
+import { DomainPill } from 'mastodon/features/account/components/domain_pill';
+import FollowRequestNoteContainer from 'mastodon/features/account/containers/follow_request_note_container';
 import { useIdentity } from 'mastodon/identity_context';
 import { autoPlayGif, me, domain as localDomain } from 'mastodon/initial_state';
 import type { Account } from 'mastodon/models/account';
@@ -61,19 +63,6 @@ import { useAppSelector, useAppDispatch } from 'mastodon/store';
 import { FamiliarFollowers } from './familiar_followers';
 import { MemorialNote } from './memorial_note';
 import { MovedNote } from './moved_note';
-import { DomainPill } from '../../account/components/domain_pill';
-
-const FollowRequestNoteContainer: React.FC<{ account: Account }> = ({ account }) => (
-  <div className="account-memorial-banner">
-    <div className="account-memorial-banner__message">
-      <FormattedMessage
-        id="account.requested_follow"
-        defaultMessage="{name} has requested to follow you"
-        values={{ name: <DisplayName account={account} variant="simple" /> }}
-      />
-    </div>
-  </div>
-);
 
 const messages = defineMessages({
   unblock: { id: 'account.unblock', defaultMessage: 'Unblock @{name}' },

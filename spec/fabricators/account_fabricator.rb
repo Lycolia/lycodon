@@ -17,7 +17,3 @@ Fabricator(:account) do
   discoverable        true
   indexable           true
 end
-
-Fabricator(:remote_account, from: :account) do
-  domain 'example.com'
-end

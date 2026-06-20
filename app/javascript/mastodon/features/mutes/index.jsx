@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 
-import { defineMessages, FormattedMessage } from 'react-intl';
+import { defineMessages, injectIntl, FormattedMessage } from 'react-intl';
 
-import { Helmet } from '@unhead/react/helmet';
+import { Helmet } from 'react-helmet';
 
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import ImmutablePureComponent from 'react-immutable-pure-component';
@@ -12,7 +12,6 @@ import { debounce } from 'lodash';
 
 import VolumeOffIcon from '@/material-icons/400-24px/volume_off.svg?react';
 import { Account } from 'mastodon/components/account';
-import { injectIntl } from '@/mastodon/components/intl';
 
 import { fetchMutes, expandMutes } from '../../actions/mutes';
 import { LoadingIndicator } from '../../components/loading_indicator';
@@ -41,7 +40,7 @@ class Mutes extends ImmutablePureComponent {
     multiColumn: PropTypes.bool,
   };
 
-  componentDidMount () {
+  UNSAFE_componentWillMount () {
     this.props.dispatch(fetchMutes());
   }
 

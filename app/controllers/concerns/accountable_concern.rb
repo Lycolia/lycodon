@@ -4,8 +4,10 @@ module AccountableConcern
   extend ActiveSupport::Concern
 
   def log_action(action, target)
-    current_account
-      .action_logs
-      .create(action:, target:)
+    Admin::ActionLog.create(
+      account: current_account,
+      action: action,
+      target: target
+    )
   end
 end

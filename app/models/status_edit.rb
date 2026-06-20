@@ -5,21 +5,25 @@
 # Table name: status_edits
 #
 #  id                           :bigint(8)        not null, primary key
-#  media_descriptions           :text             is an Array
-#  ordered_media_attachment_ids :bigint(8)        is an Array
-#  poll_options                 :string           is an Array
-#  sensitive                    :boolean
-#  spoiler_text                 :text             default(""), not null
+#  status_id                    :bigint(8)        not null
+#  account_id                   :bigint(8)
 #  text                         :text             default(""), not null
+#  spoiler_text                 :text             default(""), not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
-#  account_id                   :bigint(8)
+#  ordered_media_attachment_ids :bigint(8)        is an Array
+#  media_descriptions           :text             is an Array
+#  poll_options                 :string           is an Array
+#  sensitive                    :boolean
 #  quote_id                     :bigint(8)
-#  status_id                    :bigint(8)        not null
 #
 
 class StatusEdit < ApplicationRecord
   include RateLimitable
+
+  self.ignored_columns += %w(
+    media_attachments_changed
+  )
 
   class PreservedMediaAttachment < ActiveModelSerializers::Model
     attributes :media_attachment, :description

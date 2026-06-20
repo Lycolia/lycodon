@@ -7,7 +7,6 @@ import ImmutablePropTypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
 
 import { Button } from 'mastodon/components/button';
-import { NavigationFocusTarget } from 'mastodon/components/navigation_focus_target';
 import { toServerSideType } from 'mastodon/utils/filters';
 
 const mapStateToProps = (state, { filterId }) => ({
@@ -72,9 +71,7 @@ class AddedToFilter extends PureComponent {
 
     return (
       <>
-        <NavigationFocusTarget as='h1' className='report-dialog-modal__title'>
-          <FormattedMessage id='filter_modal.added.title' defaultMessage='Filter added!' />
-        </NavigationFocusTarget>
+        <h3 className='report-dialog-modal__title'><FormattedMessage id='filter_modal.added.title' defaultMessage='Filter added!' /></h3>
         <p className='report-dialog-modal__lead'>
           <FormattedMessage
             id='filter_modal.added.short_explanation'

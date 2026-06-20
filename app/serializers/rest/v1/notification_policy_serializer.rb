@@ -5,7 +5,6 @@ class REST::V1::NotificationPolicySerializer < ActiveModel::Serializer
              :filter_not_followers,
              :filter_new_accounts,
              :filter_private_mentions,
-             :filter_bots,
              :summary
 
   def summary
@@ -29,9 +28,5 @@ class REST::V1::NotificationPolicySerializer < ActiveModel::Serializer
 
   def filter_private_mentions
     !object.accept_private_mentions?
-  end
-
-  def filter_bots
-    !object.accept_bots?
   end
 end

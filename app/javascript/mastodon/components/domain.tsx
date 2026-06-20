@@ -9,14 +9,12 @@ import { Button } from './button';
 
 export const Domain: React.FC<{
   domain: string;
-  onUnblock?: (domain: string) => void;
-}> = ({ domain, onUnblock }) => {
+}> = ({ domain }) => {
   const dispatch = useAppDispatch();
 
   const handleDomainUnblock = useCallback(() => {
     dispatch(unblockDomain(domain));
-    onUnblock?.(domain);
-  }, [dispatch, domain, onUnblock]);
+  }, [dispatch, domain]);
 
   return (
     <div className='domain'>

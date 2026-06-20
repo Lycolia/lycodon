@@ -3,7 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'credentials API' do
-  include_context 'with API authentication', user_fabricator: :private_user, oauth_scopes: 'read:accounts write:accounts'
+  let(:user)     { Fabricate(:user, account_attributes: { discoverable: false, locked: true, indexable: false }) }
+  let(:token)    { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:scopes)   { 'read:accounts write:accounts' }
+  let(:headers)  { { 'Authorization' => "Bearer #{token.token}" } }
 
   describe 'GET /api/v1/accounts/verify_credentials' do
     subject do
@@ -91,7 +94,7 @@ RSpec.describe 'credentials API' do
         expect(response.parsed_body)
           .to include(
             error: /Validation failed/,
-            details: include(note: contain_exactly(include(error: 'ERR_TOO_LONG', description: /too long/)))
+            details: include(note: contain_exactly(include(error: 'ERR_TOO_LONG', description: /character limit/)))
           )
       end
     end

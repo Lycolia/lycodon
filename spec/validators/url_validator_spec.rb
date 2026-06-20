@@ -3,45 +3,65 @@
 require 'rails_helper'
 
 RSpec.describe URLValidator do
-  subject { record_class.new }
-
   let(:record_class) do
     Class.new do
       include ActiveModel::Validations
-
-      def self.name = 'Record'
 
       attr_accessor :profile
 
       validates :profile, url: true
     end
   end
+  let(:record) { record_class.new }
 
-  context 'with a nil value' do
-    it { is_expected.to_not allow_value(nil).for(:profile).with_message(:invalid) }
-  end
+  describe '#validate_each' do
+    context 'with a nil value' do
+      it 'adds errors' do
+        record.profile = nil
 
-  context 'with an invalid url scheme' do
-    let(:invalid_scheme_url) { 'ftp://example.com/page' }
+        expect(record).to_not be_valid
+        expect(record.errors.first.attribute).to eq(:profile)
+        expect(record.errors.first.type).to eq(:invalid)
+      end
+    end
 
-    it { is_expected.to_not allow_value(invalid_scheme_url).for(:profile).with_message(:invalid) }
-  end
+    context 'with an invalid url scheme' do
+      it 'adds errors' do
+        record.profile = 'ftp://example.com/page'
 
-  context 'without a hostname' do
-    let(:no_hostname_url) { 'https:///page' }
+        expect(record).to_not be_valid
+        expect(record.errors.first.attribute).to eq(:profile)
+        expect(record.errors.first.type).to eq(:invalid)
+      end
+    end
 
-    it { is_expected.to_not allow_value(no_hostname_url).for(:profile).with_message(:invalid) }
-  end
+    context 'without a hostname' do
+      it 'adds errors' do
+        record.profile = 'https:///page'
 
-  context 'with an unparseable value' do
-    let(:non_numeric_port_url) { 'https://host:port/page' }
+        expect(record).to_not be_valid
+        expect(record.errors.first.attribute).to eq(:profile)
+        expect(record.errors.first.type).to eq(:invalid)
+      end
+    end
 
-    it { is_expected.to_not allow_value(non_numeric_port_url).for(:profile).with_message(:invalid) }
-  end
+    context 'with an unparseable value' do
+      it 'adds errors' do
+        record.profile = 'https://host:port/page' # non-numeric port string causes invalid uri error
 
-  context 'with a valid url' do
-    let(:valid_url) { 'https://example.com/page' }
+        expect(record).to_not be_valid
+        expect(record.errors.first.attribute).to eq(:profile)
+        expect(record.errors.first.type).to eq(:invalid)
+      end
+    end
 
-    it { is_expected.to allow_value(valid_url).for(:profile) }
+    context 'with a valid url' do
+      it 'does not add errors' do
+        record.profile = 'https://example.com/page'
+
+        expect(record).to be_valid
+        expect(record.errors).to be_empty
+      end
+    end
   end
 end

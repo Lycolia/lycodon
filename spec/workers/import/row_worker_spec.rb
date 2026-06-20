@@ -20,7 +20,6 @@ RSpec.describe Import::RowWorker do
 
     shared_context 'when service errors' do
       let(:service_double) { instance_double(BulkImportRowService) }
-
       before { allow(service_double).to receive(:call).and_raise('dummy error') }
     end
 

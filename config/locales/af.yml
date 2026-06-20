@@ -9,6 +9,7 @@ af:
     followers:
       one: Volgeling
       other: Volgelinge
+    following: Volg
     nothing_here: Daar is niks hier nie!
     posts:
       one: Plasing

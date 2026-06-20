@@ -3,7 +3,11 @@
 require 'rails_helper'
 
 RSpec.describe 'Domain Blocks' do
-  include_context 'with API authentication', user_fabricator: :admin_user, oauth_scopes: 'admin:read:domain_blocks admin:write:domain_blocks'
+  let(:role)    { UserRole.find_by(name: 'Admin') }
+  let(:user)    { Fabricate(:user, role: role) }
+  let(:scopes)  { 'admin:read:domain_blocks admin:write:domain_blocks' }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 
   describe 'GET /api/v1/admin/domain_blocks' do
     subject do

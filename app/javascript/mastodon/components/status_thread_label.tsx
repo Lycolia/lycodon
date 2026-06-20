@@ -51,7 +51,7 @@ export const StatusThreadLabel: React.FC<{
       <div className='status__prepend__icon'>
         <Icon id='reply' icon={ReplyIcon} />
       </div>
-      <span>{label}</span>
+      {label}
     </div>
   );
 };

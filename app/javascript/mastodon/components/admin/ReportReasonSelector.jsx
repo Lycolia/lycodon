@@ -1,13 +1,11 @@
 import PropTypes from 'prop-types';
 import { PureComponent } from 'react';
 
-import { defineMessages } from 'react-intl';
+import { injectIntl, defineMessages } from 'react-intl';
 
 import classNames from 'classnames';
 
 import api from 'mastodon/api';
-
-import { injectIntl } from '../intl';
 
 const messages = defineMessages({
   legal: { id: 'report.categories.legal', defaultMessage: 'Legal' },

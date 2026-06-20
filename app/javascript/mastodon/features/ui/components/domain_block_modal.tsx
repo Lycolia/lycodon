@@ -15,7 +15,6 @@ import { apiRequest } from 'mastodon/api';
 import { Button } from 'mastodon/components/button';
 import { Icon } from 'mastodon/components/icon';
 import { LoadingIndicator } from 'mastodon/components/loading_indicator';
-import { NavigationFocusTarget } from 'mastodon/components/navigation_focus_target';
 import { ShortNumber } from 'mastodon/components/short_number';
 import { useAppDispatch } from 'mastodon/store';
 
@@ -54,6 +53,8 @@ export const DomainBlockModal: React.FC<{
   }, [dispatch]);
 
   useEffect(() => {
+    setLoading(true);
+
     apiRequest<DomainBlockPreviewResponse>('GET', 'v1/domain_blocks/preview', {
       params: { domain },
       timeout: 5000,
@@ -67,7 +68,7 @@ export const DomainBlockModal: React.FC<{
         setPreview('error');
         setLoading(false);
       });
-  }, [domain]);
+  }, [setPreview, setLoading, domain]);
 
   return (
     <div className='modal-root__modal safety-action-modal' aria-live='polite'>
@@ -78,21 +79,21 @@ export const DomainBlockModal: React.FC<{
           </div>
 
           <div>
-            <NavigationFocusTarget as='h1'>
+            <h1>
               <FormattedMessage
                 id='domain_block_modal.title'
                 defaultMessage='Block domain?'
               />
-            </NavigationFocusTarget>
-            <p>{domain}</p>
+            </h1>
+            <div>{domain}</div>
           </div>
         </div>
 
-        <ul className='safety-action-modal__bullet-points'>
+        <div className='safety-action-modal__bullet-points'>
           {preview &&
             preview !== 'error' &&
             preview.followers_count + preview.following_count > 0 && (
-              <li>
+              <div>
                 <div className='safety-action-modal__bullet-points__icon'>
                   <Icon id='' icon={PersonRemoveIcon} />
                 </div>
@@ -114,11 +115,11 @@ export const DomainBlockModal: React.FC<{
                     />
                   </strong>
                 </div>
-              </li>
+              </div>
             )}
 
           {preview === 'error' && (
-            <li>
+            <div>
               <div className='safety-action-modal__bullet-points__icon'>
                 <Icon id='' icon={PersonRemoveIcon} />
               </div>
@@ -130,10 +131,10 @@ export const DomainBlockModal: React.FC<{
                   />
                 </strong>
               </div>
-            </li>
+            </div>
           )}
 
-          <li className='safety-action-modal__bullet-points--deemphasized'>
+          <div className='safety-action-modal__bullet-points--deemphasized'>
             <div className='safety-action-modal__bullet-points__icon'>
               <Icon id='' icon={CampaignIcon} />
             </div>
@@ -143,9 +144,9 @@ export const DomainBlockModal: React.FC<{
                 defaultMessage="They won't know they've been blocked."
               />
             </div>
-          </li>
+          </div>
 
-          <li className='safety-action-modal__bullet-points--deemphasized'>
+          <div className='safety-action-modal__bullet-points--deemphasized'>
             <div className='safety-action-modal__bullet-points__icon'>
               <Icon id='' icon={VisibilityOffIcon} />
             </div>
@@ -155,9 +156,9 @@ export const DomainBlockModal: React.FC<{
                 defaultMessage="You won't see posts or notifications from users on this server."
               />
             </div>
-          </li>
+          </div>
 
-          <li className='safety-action-modal__bullet-points--deemphasized'>
+          <div className='safety-action-modal__bullet-points--deemphasized'>
             <div className='safety-action-modal__bullet-points__icon'>
               <Icon id='' icon={ReplyIcon} />
             </div>
@@ -167,9 +168,9 @@ export const DomainBlockModal: React.FC<{
                 defaultMessage='Nobody from this server can follow you.'
               />
             </div>
-          </li>
+          </div>
 
-          <li className='safety-action-modal__bullet-points--deemphasized'>
+          <div className='safety-action-modal__bullet-points--deemphasized'>
             <div className='safety-action-modal__bullet-points__icon'>
               <Icon id='' icon={HistoryIcon} />
             </div>
@@ -179,8 +180,8 @@ export const DomainBlockModal: React.FC<{
                 defaultMessage='People from this server can interact with your old posts.'
               />
             </div>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
 
       <div className='safety-action-modal__bottom'>
@@ -195,7 +196,7 @@ export const DomainBlockModal: React.FC<{
 
           <div className='spacer' />
 
-          <button onClick={handleCancel} className='link-button' type='button'>
+          <button onClick={handleCancel} className='link-button'>
             <FormattedMessage
               id='confirmation_modal.cancel'
               defaultMessage='Cancel'

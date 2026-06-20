@@ -85,7 +85,7 @@ export default class Dimension extends PureComponent {
 
     return (
       <div className='dimension'>
-        <h2>{label}</h2>
+        <h4>{label}</h4>
 
         {content}
       </div>

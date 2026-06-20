@@ -73,6 +73,8 @@ RSpec.describe Mastodon::RedisConfiguration do
   end
 
   shared_examples 'sentinel support' do |prefix = nil|
+    prefix = prefix ? "#{prefix}_" : ''
+
     context 'when configuring sentinel support' do
       around do |example|
         ClimateControl.modify "#{prefix}REDIS_PASSWORD": 'testpass1', "#{prefix}REDIS_HOST": 'redis2.example.com', "#{prefix}REDIS_SENTINELS": '192.168.0.1:3000,192.168.0.2:4000', "#{prefix}REDIS_SENTINEL_MASTER": 'mainsentinel' do
@@ -197,7 +199,7 @@ RSpec.describe Mastodon::RedisConfiguration do
 
     it_behaves_like 'secondary configuration', 'SIDEKIQ'
     it_behaves_like 'setting a different driver'
-    it_behaves_like 'sentinel support', 'SIDEKIQ_'
+    it_behaves_like 'sentinel support', 'SIDEKIQ'
   end
 
   describe '#cache' do
@@ -223,6 +225,6 @@ RSpec.describe Mastodon::RedisConfiguration do
 
     it_behaves_like 'secondary configuration', 'CACHE'
     it_behaves_like 'setting a different driver'
-    it_behaves_like 'sentinel support', 'CACHE_'
+    it_behaves_like 'sentinel support', 'CACHE'
   end
 end

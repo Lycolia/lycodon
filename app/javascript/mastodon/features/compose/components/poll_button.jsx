@@ -1,10 +1,9 @@
 import PropTypes from 'prop-types';
 import { PureComponent } from 'react';
 
-import { defineMessages } from 'react-intl';
+import { defineMessages, injectIntl } from 'react-intl';
 
 import BarChart4BarsIcon from '@/material-icons/400-20px/bar_chart_4_bars.svg?react';
-import { injectIntl } from '@/mastodon/components/intl';
 
 import { IconButton } from '../../../components/icon_button';
 

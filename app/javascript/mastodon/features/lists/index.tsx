@@ -2,12 +2,9 @@ import { useEffect, useMemo, useCallback } from 'react';
 
 import { defineMessages, useIntl, FormattedMessage } from 'react-intl';
 
+import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 
-import { Helmet } from '@unhead/react/helmet';
-
-import { NotSignedInIndicator } from '@/mastodon/components/not_signed_in_indicator';
-import { useIdentity } from '@/mastodon/identity_context';
 import AddIcon from '@/material-icons/400-24px/add.svg?react';
 import ListAltIcon from '@/material-icons/400-24px/list_alt.svg?react';
 import MoreHorizIcon from '@/material-icons/400-24px/more_horiz.svg?react';
@@ -80,13 +77,10 @@ const Lists: React.FC<{
   const dispatch = useAppDispatch();
   const intl = useIntl();
   const lists = useAppSelector((state) => getOrderedLists(state));
-  const { signedIn } = useIdentity();
 
   useEffect(() => {
-    if (signedIn) {
-      void dispatch(fetchLists());
-    }
-  }, [signedIn, dispatch]);
+    void dispatch(fetchLists());
+  }, [dispatch]);
 
   const emptyMessage = (
     <>
@@ -117,16 +111,14 @@ const Lists: React.FC<{
         iconComponent={ListAltIcon}
         multiColumn={multiColumn}
         extraButton={
-          signedIn && (
-            <Link
-              to='/lists/new'
-              className='column-header__button'
-              title={intl.formatMessage(messages.create)}
-              aria-label={intl.formatMessage(messages.create)}
-            >
-              <Icon id='plus' icon={AddIcon} />
-            </Link>
-          )
+          <Link
+            to='/lists/new'
+            className='column-header__button'
+            title={intl.formatMessage(messages.create)}
+            aria-label={intl.formatMessage(messages.create)}
+          >
+            <Icon id='plus' icon={AddIcon} />
+          </Link>
         }
       />
 
@@ -135,13 +127,9 @@ const Lists: React.FC<{
         emptyMessage={emptyMessage}
         bindToDocument={!multiColumn}
       >
-        {signedIn ? (
-          lists.map((list) => (
-            <ListItem key={list.id} id={list.id} title={list.title} />
-          ))
-        ) : (
-          <NotSignedInIndicator />
-        )}
+        {lists.map((list) => (
+          <ListItem key={list.id} id={list.id} title={list.title} />
+        ))}
       </ScrollableList>
 
       <Helmet>

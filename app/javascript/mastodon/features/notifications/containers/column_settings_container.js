@@ -1,10 +1,9 @@
-import { defineMessages } from 'react-intl';
+import { defineMessages, injectIntl } from 'react-intl';
 
 import { connect } from 'react-redux';
 
 import { openModal } from 'mastodon/actions/modal';
 import { fetchNotifications , setNotificationsFilter } from 'mastodon/actions/notification_groups';
-import { injectIntl } from '@/mastodon/components/intl';
 
 import { showAlert } from '../../../actions/alerts';
 import { requestBrowserPermission } from '../../../actions/notifications';

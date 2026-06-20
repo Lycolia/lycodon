@@ -2,15 +2,14 @@
 
 class ActivityPub::OutboxSerializer < ActivityPub::CollectionSerializer
   def self.serializer_for(model, options)
-    case model
-    when Status
-      model.reblog? ? ActivityPub::AnnounceNoteSerializer : ActivityPub::CreateNoteSerializer
+    if model.instance_of?(::ActivityPub::ActivityPresenter)
+      ActivityPub::ActivitySerializer
     else
       super
     end
   end
 
   def items
-    object.items
+    object.items.map { |status| ActivityPub::ActivityPresenter.from_status(status) }
   end
 end

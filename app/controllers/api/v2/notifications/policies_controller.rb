@@ -32,8 +32,7 @@ class Api::V2::Notifications::PoliciesController < Api::BaseController
       :for_not_followers,
       :for_new_accounts,
       :for_private_mentions,
-      :for_limited_accounts,
-      :for_bots
+      :for_limited_accounts
     )
   end
 end

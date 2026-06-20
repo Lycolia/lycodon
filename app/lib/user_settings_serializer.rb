@@ -6,7 +6,7 @@ class UserSettingsSerializer
       if value.blank?
         {}
       else
-        JSON.parse(value, symbolize_names: true)
+        Oj.load(value, symbol_keys: true)
       end
     end
 
@@ -14,6 +14,6 @@ class UserSettingsSerializer
   end
 
   def self.dump(value)
-    JSON.generate(value.as_json)
+    Oj.dump(value.as_json)
   end
 end

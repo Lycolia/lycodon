@@ -17,7 +17,7 @@ RSpec.describe 'Remote Interaction Helper' do
           )
         )
       expect(response.body)
-        .to include('remote_interaction_helper')
+        .to match(/remote_interaction_helper/)
     end
   end
 

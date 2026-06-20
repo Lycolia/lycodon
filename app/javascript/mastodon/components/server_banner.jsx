@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import { PureComponent } from 'react';
 
-import { FormattedMessage, defineMessages } from 'react-intl';
+import { FormattedMessage, defineMessages, injectIntl } from 'react-intl';
 
-import { NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 
@@ -14,15 +14,12 @@ import { ShortNumber } from 'mastodon/components/short_number';
 import { Skeleton } from 'mastodon/components/skeleton';
 import { domain } from 'mastodon/initial_state';
 
-import { injectIntl } from './intl';
-
 const messages = defineMessages({
   aboutActiveUsers: { id: 'server_banner.about_active_users', defaultMessage: 'People using this server during the last 30 days (Monthly Active Users)' },
-  aboutThisServer: { id: 'server_banner.more_about_this_server', defaultMessage: 'More about this server'},
 });
 
 const mapStateToProps = state => ({
-  server: state.server.server,
+  server: state.getIn(['server', 'server']),
 });
 
 class ServerBanner extends PureComponent {
@@ -40,7 +37,7 @@ class ServerBanner extends PureComponent {
 
   render () {
     const { server, intl } = this.props;
-    const isLoading = server.isLoading;
+    const isLoading = server.get('isLoading');
 
     return (
       <div className='server-banner'>
@@ -48,14 +45,9 @@ class ServerBanner extends PureComponent {
           <FormattedMessage id='server_banner.is_one_of_many' defaultMessage='{domain} is one of the many independent Mastodon servers you can use to participate in the fediverse.' values={{ domain: <strong>{domain}</strong>, mastodon: <a href='https://joinmastodon.org' target='_blank' rel='noopener'>Mastodon</a> }} />
         </div>
 
-        <NavLink to='/about'>
-          <ServerHeroImage
-            blurhash={server.item?.thumbnail.blurhash}
-            src={server.item?.thumbnail.url}
-            alt={intl.formatMessage(messages.aboutThisServer)}
-            className='server-banner__hero'
-          />
-        </NavLink>
+        <Link to='/about'>
+          <ServerHeroImage blurhash={server.getIn(['thumbnail', 'blurhash'])} src={server.getIn(['thumbnail', 'url'])} className='server-banner__hero' />
+        </Link>
 
         <div className='server-banner__description'>
           {isLoading ? (
@@ -66,14 +58,14 @@ class ServerBanner extends PureComponent {
               <br />
               <Skeleton width='70%' />
             </>
-          ) : server.item?.description}
+          ) : server.get('description')}
         </div>
 
         <div className='server-banner__meta'>
           <div className='server-banner__meta__column'>
             <h4><FormattedMessage id='server_banner.administered_by' defaultMessage='Administered by:' /></h4>
 
-            <Account id={server.item?.contact.account?.id} size={36} minimal />
+            <Account id={server.getIn(['contact', 'account', 'id'])} size={36} minimal />
           </div>
 
           <div className='server-banner__meta__column'>
@@ -87,7 +79,7 @@ class ServerBanner extends PureComponent {
               </>
             ) : (
               <>
-                <strong className='server-banner__number'><ShortNumber value={server.item?.usage.users.active_month} /></strong>
+                <strong className='server-banner__number'><ShortNumber value={server.getIn(['usage', 'users', 'active_month'])} /></strong>
                 <br />
                 <span className='server-banner__number-label' title={intl.formatMessage(messages.aboutActiveUsers)}><FormattedMessage id='server_banner.active_users' defaultMessage='active users' /></span>
               </>

@@ -2,6 +2,32 @@
 
 ENV['RAILS_ENV'] ||= 'test'
 
+if ENV.fetch('COVERAGE', false)
+  require 'simplecov'
+
+  SimpleCov.start 'rails' do
+    if ENV['CI']
+      require 'simplecov-lcov'
+      formatter SimpleCov::Formatter::LcovFormatter
+      formatter.config.report_with_single_file = true
+    else
+      formatter SimpleCov::Formatter::HTMLFormatter
+    end
+
+    enable_coverage :branch
+
+    add_filter 'lib/linter'
+
+    add_group 'Libraries', 'lib'
+    add_group 'Policies', 'app/policies'
+    add_group 'Presenters', 'app/presenters'
+    add_group 'Search', 'app/chewy'
+    add_group 'Serializers', 'app/serializers'
+    add_group 'Services', 'app/services'
+    add_group 'Validators', 'app/validators'
+  end
+end
+
 # This needs to be defined before Rails is initialized
 STREAMING_PORT = ENV.fetch('TEST_STREAMING_PORT', '4020')
 STREAMING_HOST = ENV.fetch('TEST_STREAMING_HOST', 'localhost')
@@ -17,6 +43,7 @@ require 'webmock/rspec'
 require 'paperclip/matchers'
 require 'capybara/rspec'
 require 'chewy/rspec'
+require 'email_spec/rspec'
 require 'pundit/rspec'
 require 'test_prof/recipes/rspec/before_all'
 
@@ -30,6 +57,8 @@ WebMock.disable_net_connect!(
 Sidekiq.default_configuration.logger = nil
 
 DatabaseCleaner.strategy = [:deletion]
+
+Chewy.settings[:enabled] = false
 
 Devise::Test::ControllerHelpers.module_eval do
   alias_method :original_sign_in, :sign_in
@@ -82,7 +111,6 @@ RSpec.configure do |config|
   config.include Devise::Test::IntegrationHelpers, type: :request
   config.include ActionMailer::TestHelper
   config.include Paperclip::Shoulda::Matchers
-  config.include ActiveSupport::Testing::NotificationAssertions
   config.include ActiveSupport::Testing::TimeHelpers
   config.include Chewy::Rspec::Helpers
   config.include Redisable
@@ -91,8 +119,6 @@ RSpec.configure do |config|
   config.include SignedRequestHelpers, type: :request
   config.include CommandLineHelpers, type: :cli
   config.include SystemHelpers, type: :system
-  config.include Shoulda::Matchers::ActiveModel, type: :validator
-  config.include HtmlHeadInspection, type: :request
 
   # TODO: Remove when Devise fixes https://github.com/heartcombo/devise/issues/5705
   config.before do
@@ -107,11 +133,17 @@ RSpec.configure do |config|
 
   config.around do |example|
     if example.metadata[:inline_jobs] == true
-      Sidekiq.testing!(:inline)
+      Sidekiq::Testing.inline!
     else
-      Sidekiq.testing!(:fake)
+      Sidekiq::Testing.fake!
     end
     example.run
+  end
+
+  config.around(:each, type: :search) do |example|
+    Chewy.settings[:enabled] = true
+    example.run
+    Chewy.settings[:enabled] = false
   end
 
   config.before :each, type: :cli do

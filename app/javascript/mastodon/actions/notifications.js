@@ -26,10 +26,8 @@ defineMessages({
 
 export function updateNotifications(notification, intlMessages, intlLocale) {
   return (dispatch, getState) => {
-    const filterType = notification.type === 'quoted_update' ? 'update' : notification.type;
-
-    const showAlert    = getState().getIn(['settings', 'notifications', 'alerts', filterType], true);
-    const playSound    = getState().getIn(['settings', 'notifications', 'sounds', filterType], true);
+    const showAlert    = getState().getIn(['settings', 'notifications', 'alerts', notification.type], true);
+    const playSound    = getState().getIn(['settings', 'notifications', 'sounds', notification.type], true);
 
     let filtered = false;
 
@@ -86,9 +84,6 @@ export function setupBrowserNotifications() {
   };
 }
 
-/**
- * @param {(NotificationPermission) => void} callback
- */
 export function requestBrowserPermission(callback = noOp) {
   return dispatch => {
     requestNotificationPermission((permission) => {

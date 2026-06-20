@@ -1,14 +1,11 @@
-import type { Map as ImmutableMap } from 'immutable';
-import { Record as ImmutableRecord, List as ImmutableList } from 'immutable';
+import { createSelector } from '@reduxjs/toolkit';
+import { Record as ImmutableRecord } from 'immutable';
 
 import { me } from 'mastodon/initial_state';
 import { accountDefaultValues } from 'mastodon/models/account';
 import type { Account, AccountShape } from 'mastodon/models/account';
 import type { Relationship } from 'mastodon/models/relationship';
-import { createAppSelector } from 'mastodon/store';
 import type { RootState } from 'mastodon/store';
-
-import type { ApiHashtagJSON } from '../api_types/tags';
 
 const getAccountBase = (state: RootState, id: string) =>
   state.accounts.get(id, null);
@@ -36,7 +33,7 @@ const FullAccountFactory = ImmutableRecord<FullAccountShape>({
 });
 
 export function makeGetAccount() {
-  return createAppSelector(
+  return createSelector(
     [getAccountBase, getAccountRelationship, getAccountMoved],
     (base, relationship, moved) => {
       if (base === null) {
@@ -50,61 +47,28 @@ export function makeGetAccount() {
   );
 }
 
-export const getAccountHidden = createAppSelector(
+export const getAccountHidden = createSelector(
   [
-    (state, id: string) => state.accounts.get(id)?.hidden,
-    (state, id: string) =>
+    (state: RootState, id: string) => state.accounts.get(id)?.hidden,
+    (state: RootState, id: string) =>
       state.relationships.get(id)?.following ||
       state.relationships.get(id)?.requested,
-    (_, id: string) => id === me,
+    (state: RootState, id: string) => id === me,
   ],
   (hidden, followingOrRequested, isSelf) => {
     return hidden && !(isSelf || followingOrRequested);
   },
 );
 
-export const getAccountFamiliarFollowers = createAppSelector(
+export const getAccountFamiliarFollowers = createSelector(
   [
-    (state) => state.accounts,
-    (state, id: string) => state.accounts_familiar_followers[id],
+    (state: RootState) => state.accounts,
+    (state: RootState, id: string) => state.accounts_familiar_followers[id],
   ],
   (accounts, accounts_familiar_followers) => {
     if (!accounts_familiar_followers) return null;
     return accounts_familiar_followers
       .map((id) => accounts.get(id))
       .filter((f) => !!f);
-  },
-);
-
-export type TagType = Omit<
-  ApiHashtagJSON,
-  'history' | 'following' | 'featured'
-> & {
-  accountId: string;
-  statuses_count: number;
-  last_status_at: string;
-};
-
-export const selectAccountFeaturedTags = createAppSelector(
-  [(state) => state.user_lists, (_, accountId: string) => accountId],
-  (user_lists, accountId) => {
-    const list = user_lists.getIn(
-      ['featured_tags', accountId, 'items'],
-      ImmutableList(),
-    ) as ImmutableList<ImmutableMap<string, string | null>>;
-    return list.toArray().map(
-      (tag) =>
-        ({
-          id: tag.get('id') as string,
-          name: tag.get('name') as string,
-          url: tag.get('url') as string,
-          accountId: tag.get('accountId') as string,
-          statuses_count: Number.parseInt(
-            tag.get('statuses_count') as string,
-            10,
-          ),
-          last_status_at: tag.get('last_status_at') as string,
-        }) satisfies TagType,
-    );
   },
 );

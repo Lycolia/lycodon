@@ -7,6 +7,6 @@ class Scheduler::InstanceRefreshScheduler
 
   def perform
     Instance.refresh
-    InstancesIndex.sync if Chewy.enabled?
+    InstancesIndex.import if Chewy.enabled?
   end
 end

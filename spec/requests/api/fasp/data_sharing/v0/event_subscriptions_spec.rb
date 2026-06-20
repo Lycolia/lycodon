@@ -6,57 +6,51 @@ RSpec.describe 'Api::Fasp::DataSharing::V0::EventSubscriptions', feature: :fasp 
   include ProviderRequestHelper
 
   describe 'POST /api/fasp/data_sharing/v0/event_subscriptions' do
-    subject do
-      post api_fasp_data_sharing_v0_event_subscriptions_path, headers:, params:, as: :json
-    end
-
-    let(:provider) { Fabricate(:confirmed_fasp) }
-    let(:params) { { category: 'content', subscriptionType: 'lifecycle', maxBatchSize: 10 } }
-    let(:headers) do
-      request_authentication_headers(provider,
-                                     url: api_fasp_data_sharing_v0_event_subscriptions_url,
-                                     method: :post,
-                                     body: params)
-    end
-
-    it_behaves_like 'forbidden for unconfirmed provider'
+    let(:provider) { Fabricate(:fasp_provider) }
 
     context 'with valid parameters' do
       it 'creates a new subscription' do
+        params = { category: 'content', subscriptionType: 'lifecycle', maxBatchSize: 10 }
+        headers = request_authentication_headers(provider,
+                                                 url: api_fasp_data_sharing_v0_event_subscriptions_url,
+                                                 method: :post,
+                                                 body: params)
+
         expect do
-          subject
+          post api_fasp_data_sharing_v0_event_subscriptions_path, headers:, params:, as: :json
         end.to change(Fasp::Subscription, :count).by(1)
         expect(response).to have_http_status(201)
       end
     end
 
     context 'with invalid parameters' do
-      let(:params) { { category: 'unknown' } }
-
       it 'does not create a subscription' do
-        expect { subject }.to_not change(Fasp::Subscription, :count)
+        params = { category: 'unknown' }
+        headers = request_authentication_headers(provider,
+                                                 url: api_fasp_data_sharing_v0_event_subscriptions_url,
+                                                 method: :post,
+                                                 body: params)
+
+        expect do
+          post api_fasp_data_sharing_v0_event_subscriptions_path, headers:, params:, as: :json
+        end.to_not change(Fasp::Subscription, :count)
         expect(response).to have_http_status(422)
       end
     end
   end
 
   describe 'DELETE /api/fasp/data_sharing/v0/event_subscriptions/:id' do
-    subject do
-      delete api_fasp_data_sharing_v0_event_subscription_path(subscription), headers:, as: :json
-    end
-
-    let(:provider) { Fabricate(:confirmed_fasp) }
-    let!(:subscription) { Fabricate(:fasp_subscription, fasp_provider: provider) }
-    let(:headers) do
-      request_authentication_headers(provider,
-                                     url: api_fasp_data_sharing_v0_event_subscription_url(subscription),
-                                     method: :delete)
-    end
-
-    it_behaves_like 'forbidden for unconfirmed provider'
+    let(:subscription) { Fabricate(:fasp_subscription) }
+    let(:provider) { subscription.fasp_provider }
 
     it 'deletes the subscription' do
-      expect { subject }.to change(Fasp::Subscription, :count).by(-1)
+      headers = request_authentication_headers(provider,
+                                               url: api_fasp_data_sharing_v0_event_subscription_url(subscription),
+                                               method: :delete)
+
+      expect do
+        delete api_fasp_data_sharing_v0_event_subscription_path(subscription), headers:, as: :json
+      end.to change(Fasp::Subscription, :count).by(-1)
       expect(response).to have_http_status(204)
     end
   end

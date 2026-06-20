@@ -3,8 +3,9 @@
 require 'rails_helper'
 
 RSpec.describe 'Admin Dimensions' do
-  include_context 'with API authentication', user_fabricator: :admin_user
-
+  let(:user)    { Fabricate(:admin_user) }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
   let(:account) { Fabricate(:account) }
 
   describe 'GET /api/v1/admin/dimensions' do

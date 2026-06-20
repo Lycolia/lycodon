@@ -6,11 +6,10 @@ import { Skeleton } from '../skeleton';
 import type { DisplayNameProps } from './index';
 import { DisplayNameWithoutDomain } from './no-domain';
 
-export function useAccountHandle(
-  account: DisplayNameProps['account'],
-  localDomain: DisplayNameProps['localDomain'],
-) {
-  return useMemo(() => {
+export const DisplayNameDefault: FC<
+  Omit<DisplayNameProps, 'variant'> & ComponentPropsWithoutRef<'span'>
+> = ({ account, localDomain, className, ...props }) => {
+  const username = useMemo(() => {
     if (!account) {
       return null;
     }
@@ -21,12 +20,6 @@ export function useAccountHandle(
     }
     return `@${acct}`;
   }, [account, localDomain]);
-}
-
-export const DisplayNameDefault: FC<
-  Omit<DisplayNameProps, 'variant'> & ComponentPropsWithoutRef<'span'>
-> = ({ account, localDomain, className, ...props }) => {
-  const username = useAccountHandle(account, localDomain);
 
   return (
     <DisplayNameWithoutDomain

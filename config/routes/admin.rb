@@ -3,12 +3,12 @@
 namespace :admin do
   get '/dashboard', to: 'dashboard#index'
 
-  concern :batch do
-    collection { post :batch }
-  end
-
   resources :domain_allows, only: [:new, :create, :destroy]
-  resources :domain_blocks, only: [:new, :create, :destroy, :update, :edit], concerns: :batch
+  resources :domain_blocks, only: [:new, :create, :destroy, :update, :edit] do
+    collection do
+      post :batch
+    end
+  end
 
   resources :export_domain_allows, only: [:new] do
     collection do
@@ -24,24 +24,9 @@ namespace :admin do
     end
   end
 
-  resources :email_domain_blocks, only: [:index, :new, :create], concerns: :batch
-
-  resources :email_subscriptions, only: [:index, :destroy] do
+  resources :email_domain_blocks, only: [:index, :new, :create] do
     collection do
-      post :purge
-      post :disable
-    end
-  end
-
-  namespace :email_subscriptions do
-    resource :setup, only: [:show, :create]
-    resource :additional_footer_text, only: [:show, :update]
-
-    resources :accounts, only: :show do
-      member do
-        post :enable
-        post :disable
-      end
+      post :batch
     end
   end
 
@@ -107,7 +92,7 @@ namespace :admin do
       post :stop_delivery
     end
 
-    resources :moderation_notes, module: :instances, only: [:create, :destroy]
+    resources :moderation_notes, controller: 'instances/moderation_notes', only: [:create, :destroy]
   end
 
   resources :rules, only: [:index, :new, :create, :edit, :update, :destroy] do
@@ -123,13 +108,13 @@ namespace :admin do
       post :disable
     end
 
-    resource :secret, only: [], module: :webhooks do
+    resource :secret, only: [], controller: 'webhooks/secrets' do
       post :rotate
     end
   end
 
   resources :reports, only: [:index, :show] do
-    resources :actions, only: [:create], module: :reports do
+    resources :actions, only: [:create], controller: 'reports/actions' do
       collection do
         post :preview
       end
@@ -145,7 +130,7 @@ namespace :admin do
 
   resources :report_notes, only: [:create, :destroy]
 
-  resources :accounts, only: [:index, :show, :destroy], concerns: :batch do
+  resources :accounts, only: [:index, :show, :destroy] do
     member do
       post :enable
       post :unsensitive
@@ -160,12 +145,19 @@ namespace :admin do
       post :unblock_email
     end
 
+    collection do
+      post :batch
+    end
+
     resource :change_email, only: [:show, :update]
     resource :reset, only: [:create]
     resource :action, only: [:new, :create], controller: 'account_actions'
 
-    resources :collections, only: [:index, :show], concerns: :batch
-    resources :statuses, only: [:index, :show], concerns: :batch
+    resources :statuses, only: [:index, :show] do
+      collection do
+        post :batch
+      end
+    end
 
     resources :relationships, only: [:index]
 
@@ -183,9 +175,17 @@ namespace :admin do
     end
   end
 
-  resources :custom_emojis, only: [:index, :new, :create], concerns: :batch
+  resources :custom_emojis, only: [:index, :new, :create] do
+    collection do
+      post :batch
+    end
+  end
 
-  resources :ip_blocks, only: [:index, :new, :create], concerns: :batch
+  resources :ip_blocks, only: [:index, :new, :create] do
+    collection do
+      post :batch
+    end
+  end
 
   resources :roles, except: [:show]
   resources :account_moderation_notes, only: [:create, :destroy]
@@ -193,14 +193,30 @@ namespace :admin do
   resources :tags, only: [:index, :show, :update]
 
   namespace :trends do
-    with_options only: [:index], concerns: :batch do
-      resources :links
-      resources :tags
-      resources :statuses
+    resources :links, only: [:index] do
+      collection do
+        post :batch
+      end
+    end
+
+    resources :tags, only: [:index] do
+      collection do
+        post :batch
+      end
+    end
+
+    resources :statuses, only: [:index] do
+      collection do
+        post :batch
+      end
     end
 
     namespace :links do
-      resources :preview_card_providers, only: [:index], path: :publishers, concerns: :batch
+      resources :preview_card_providers, only: [:index], path: :publishers do
+        collection do
+          post :batch
+        end
+      end
     end
   end
 
@@ -215,5 +231,9 @@ namespace :admin do
 
   resources :software_updates, only: [:index]
 
-  resources :username_blocks, except: [:show, :destroy], concerns: :batch
+  resources :username_blocks, except: [:show, :destroy] do
+    collection do
+      post :batch
+    end
+  end
 end

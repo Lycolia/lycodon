@@ -49,7 +49,7 @@ const messages = defineMessages({
 });
 
 type SimulatedMediaAttachmentJSON = ApiMediaAttachmentJSON & {
-  attached?: boolean;
+  unattached?: boolean;
 };
 
 const simulateModifiedApiResponse = (
@@ -67,8 +67,7 @@ const simulateModifiedApiResponse = (
         y: parseFloat(y ?? '0'),
       },
     },
-    attached: true,
-  } as SimulatedMediaAttachmentJSON;
+  } as unknown as SimulatedMediaAttachmentJSON;
 
   return data;
 };
@@ -138,7 +137,7 @@ export const changeUploadCompose = createDataLoadingThunk(
   (media: SimulatedMediaAttachmentJSON) => {
     return {
       media,
-      attached: typeof media.attached !== 'undefined' && media.attached,
+      attached: typeof media.unattached !== 'undefined' && !media.unattached,
     };
   },
   {
@@ -273,8 +272,4 @@ export const quoteComposeCancel = createAction('compose/quoteComposeCancel');
 
 export const setComposeQuotePolicy = createAction<ApiQuotePolicy>(
   'compose/setQuotePolicy',
-);
-
-export const setDragUploadEnabled = createAction<boolean>(
-  'compose/setDragUploadEnabled',
 );

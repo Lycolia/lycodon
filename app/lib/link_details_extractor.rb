@@ -28,11 +28,11 @@ class LinkDetailsExtractor
     end
 
     def headline
-      text_or_language_tagged_string(json['headline'])
+      json['headline']
     end
 
     def description
-      text_or_language_tagged_string(json['description'])
+      json['description']
     end
 
     def language
@@ -96,16 +96,12 @@ class LinkDetailsExtractor
       arr.is_a?(Array) ? arr.flatten.find { |item| item.is_a?(Hash) } : arr
     end
 
-    def text_or_language_tagged_string(obj)
-      obj.is_a?(Hash) && obj['@value'] && obj['@language'] ? obj['@value'] : obj
-    end
-
     def root_array(root)
       root.is_a?(Array) ? root : [root]
     end
 
     def json
-      @json ||= root_array(JSON.parse(@data)).compact.find { |obj| SUPPORTED_TYPES.include?(obj['@type']) } || {}
+      @json ||= root_array(Oj.load(@data)).compact.find { |obj| SUPPORTED_TYPES.include?(obj['@type']) } || {}
     end
   end
 
@@ -269,7 +265,7 @@ class LinkDetailsExtractor
       next unless structured_data.valid?
 
       structured_data
-    rescue JSON::ParserError, EncodingError
+    rescue Oj::ParseError, EncodingError
       Rails.logger.debug { "Invalid JSON-LD in #{@original_url}" }
       next
     end.first

@@ -44,6 +44,7 @@ RSpec.describe AnnualReport::TopHashtags do
             top_hashtags: eq(
               [
                 { name: most_tag.name, count: 3 },
+                { name: tag.name, count: 2 },
               ]
             )
           )

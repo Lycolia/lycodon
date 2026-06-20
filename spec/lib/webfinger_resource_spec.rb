@@ -11,127 +11,133 @@ RSpec.describe WebfingerResource do
     Rails.configuration.x.web_domain = before_web
   end
 
-  describe '#account' do
-    subject { described_class.new(resource).account }
-
+  describe '#username' do
     describe 'with a URL value' do
-      context 'with a route whose controller is not AccountsController' do
-        let(:resource) { 'https://example.com/users/alice/other' }
+      it 'raises with a route whose controller is not AccountsController' do
+        resource = 'https://example.com/users/alice/other'
 
-        it 'raises an error' do
-          expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
-        end
+        expect do
+          described_class.new(resource).username
+        end.to raise_error(ActiveRecord::RecordNotFound)
       end
 
-      context 'with a string that does not start with an URL' do
-        let(:resource) { 'website for http://example.com/users/alice.other' }
+      it 'raises with a route whose action is not show' do
+        resource = 'https://example.com/users/alice'
 
-        it 'raises an error' do
-          expect { subject }.to raise_error(described_class::InvalidRequest)
-        end
+        recognized = Rails.application.routes.recognize_path(resource)
+        allow(recognized).to receive(:[]).with(:controller).and_return('accounts')
+        allow(recognized).to receive(:[]).with(:username).and_return('alice')
+        allow(recognized).to receive(:[]).with(:action).and_return('create')
+
+        allow(Rails.application.routes).to receive(:recognize_path).with(resource).and_return(recognized)
+
+        expect do
+          described_class.new(resource).username
+        end.to raise_error(ActiveRecord::RecordNotFound)
+        expect(recognized).to have_received(:[]).exactly(3).times
+
+        expect(Rails.application.routes).to have_received(:recognize_path)
+          .with(resource)
+          .at_least(:once)
       end
 
-      context 'with a valid HTTPS route to an existing user' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { "https://example.com/users/#{account.username}" }
+      it 'raises with a string that doesnt start with URL' do
+        resource = 'website for http://example.com/users/alice/other'
 
-        it { is_expected.to eq(account) }
+        expect do
+          described_class.new(resource).username
+        end.to raise_error(described_class::InvalidRequest)
       end
 
-      context 'with a valid HTTPS route to an existing user using the new API scheme' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { "https://example.com/ap/users/#{account.id}" }
+      it 'finds the username in a valid https route' do
+        resource = 'https://example.com/users/alice'
 
-        it { is_expected.to eq(account) }
+        result = described_class.new(resource).username
+        expect(result).to eq 'alice'
       end
 
-      context 'with a valid HTTPS route to a non-existing user' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { 'https://example.com/users/alice' }
+      it 'finds the username in a mixed case http route' do
+        resource = 'HTTp://exAMPLe.com/users/alice'
 
-        it 'raises an error' do
-          expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
-        end
+        result = described_class.new(resource).username
+        expect(result).to eq 'alice'
       end
 
-      context 'with a mixed case HTTP but valid route to an existing user' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { "HTTp://example.com/users/#{account.username}" }
+      it 'finds the username in a valid http route' do
+        resource = 'http://example.com/users/alice'
 
-        it { is_expected.to eq(account) }
-      end
-
-      context 'with a valid HTTP route to an existing user' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { "http://example.com/users/#{account.username}" }
-
-        it { is_expected.to eq(account) }
+        result = described_class.new(resource).username
+        expect(result).to eq 'alice'
       end
     end
 
     describe 'with a username and hostname value' do
-      context 'with a non-local domain' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { "#{account.username}@remote-host.com" }
+      it 'raises on a non-local domain' do
+        resource = 'user@remote-host.com'
 
-        it 'raises an error' do
-          expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
-        end
+        expect do
+          described_class.new(resource).username
+        end.to raise_error(ActiveRecord::RecordNotFound)
       end
 
-      context 'with a valid handle for a local user with local domain' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { "#{account.username}@example.com" }
+      it 'finds username for a local domain' do
+        Rails.configuration.x.local_domain = 'example.com'
+        resource = 'alice@example.com'
 
-        before { Rails.configuration.x.local_domain = 'example.com' }
-
-        it { is_expected.to eq(account) }
+        result = described_class.new(resource).username
+        expect(result).to eq 'alice'
       end
 
-      context 'with a valid handle for a local user with web domain' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { "#{account.username}@example.com" }
+      it 'finds username for a web domain' do
+        Rails.configuration.x.web_domain = 'example.com'
+        resource = 'alice@example.com'
 
-        before { Rails.configuration.x.web_domain = 'example.com' }
-
-        it { is_expected.to eq(account) }
+        result = described_class.new(resource).username
+        expect(result).to eq 'alice'
       end
     end
 
     describe 'with an acct value' do
-      context 'with a non-local domain' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { "acct:#{account.username}@remote-host.com" }
+      it 'raises on a non-local domain' do
+        resource = 'acct:user@remote-host.com'
 
-        it 'raises an error' do
-          expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
-        end
+        expect do
+          described_class.new(resource).username
+        end.to raise_error(ActiveRecord::RecordNotFound)
       end
 
-      context 'with a valid handle for a local user with local domain' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { "acct:#{account.username}@example.com" }
+      it 'raises on a nonsense domain' do
+        resource = 'acct:user@remote-host@remote-hostess.remote.local@remote'
 
-        before { Rails.configuration.x.local_domain = 'example.com' }
-
-        it { is_expected.to eq(account) }
+        expect do
+          described_class.new(resource).username
+        end.to raise_error(ActiveRecord::RecordNotFound)
       end
 
-      context 'with a valid handle for a local user with web domain' do
-        let(:account) { Fabricate(:account) }
-        let(:resource) { "acct:#{account.username}@example.com" }
+      it 'finds the username for a local account if the domain is the local one' do
+        Rails.configuration.x.local_domain = 'example.com'
+        resource = 'acct:alice@example.com'
 
-        before { Rails.configuration.x.web_domain = 'example.com' }
+        result = described_class.new(resource).username
+        expect(result).to eq 'alice'
+      end
 
-        it { is_expected.to eq(account) }
+      it 'finds the username for a local account if the domain is the Web one' do
+        Rails.configuration.x.web_domain = 'example.com'
+        resource = 'acct:alice@example.com'
+
+        result = described_class.new(resource).username
+        expect(result).to eq 'alice'
       end
     end
 
     describe 'with a nonsense resource' do
-      let(:resource) { 'df/:dfkj' }
+      it 'raises InvalidRequest' do
+        resource = 'df/:dfkj'
 
-      it 'raises an error' do
-        expect { subject }.to raise_error(described_class::InvalidRequest)
+        expect do
+          described_class.new(resource).username
+        end.to raise_error(described_class::InvalidRequest)
       end
     end
   end

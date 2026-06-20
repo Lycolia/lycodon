@@ -18,7 +18,6 @@ import { closeModal } from 'mastodon/actions/modal';
 import { Button } from 'mastodon/components/button';
 import { CheckBox } from 'mastodon/components/check_box';
 import { Icon } from 'mastodon/components/icon';
-import { NavigationFocusTarget } from 'mastodon/components/navigation_focus_target';
 import { RadioButton } from 'mastodon/components/radio_button';
 
 const messages = defineMessages({
@@ -85,34 +84,32 @@ export const MuteModal = ({ accountId, acct }) => {
           </div>
 
           <div>
-            <NavigationFocusTarget as='h1'>
-              <FormattedMessage id='mute_modal.title' defaultMessage='Mute user?' />
-            </NavigationFocusTarget>
-            <p>@{acct}</p>
+            <h1><FormattedMessage id='mute_modal.title' defaultMessage='Mute user?' /></h1>
+            <div>@{acct}</div>
           </div>
         </div>
 
-        <ul className='safety-action-modal__bullet-points'>
-          <li>
+        <div className='safety-action-modal__bullet-points'>
+          <div>
             <div className='safety-action-modal__bullet-points__icon'><Icon icon={CampaignIcon} /></div>
             <div><FormattedMessage id='mute_modal.they_wont_know' defaultMessage="They won't know they've been muted." /></div>
-          </li>
+          </div>
 
-          <li>
+          <div>
             <div className='safety-action-modal__bullet-points__icon'><Icon icon={VisibilityOffIcon} /></div>
             <div><FormattedMessage id='mute_modal.you_wont_see_posts' defaultMessage="They can still see your posts, but you won't see theirs." /></div>
-          </li>
+          </div>
 
-          <li>
+          <div>
             <div className='safety-action-modal__bullet-points__icon'><Icon icon={AlternateEmailIcon} /></div>
             <div><FormattedMessage id='mute_modal.you_wont_see_mentions' defaultMessage="You won't see posts that mention them." /></div>
-          </li>
+          </div>
 
-          <li>
+          <div>
             <div className='safety-action-modal__bullet-points__icon'><Icon icon={ReplyIcon} /></div>
             <div><FormattedMessage id='mute_modal.they_can_mention_and_follow' defaultMessage="They can mention and follow you, but you won't see them." /></div>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
 
       <div className={classNames('safety-action-modal__bottom', { active: expanded })}>

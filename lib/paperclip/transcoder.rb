@@ -51,7 +51,10 @@ module Paperclip
           @output_options['maxrate'] = bitrate + 192_000
           @output_options['bufsize'] = bitrate * 5
 
-          @output_options['fps_mode'] = 'vfr' if high_vfr?(metadata)
+          if high_vfr?(metadata)
+            # TODO: change to `fps_mode` in the future, as `vsync` is being deprecated
+            @output_options['vsync'] = 'vfr'
+          end
         end
       end
 

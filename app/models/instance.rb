@@ -4,8 +4,8 @@
 #
 # Table name: instances
 #
-#  accounts_count :bigint(8)
 #  domain         :string           primary key
+#  accounts_count :bigint(8)
 #
 
 class Instance < ApplicationRecord

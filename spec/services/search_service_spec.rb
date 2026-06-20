@@ -86,6 +86,6 @@ RSpec.describe SearchService do
   end
 
   def empty_results
-    { accounts: [], hashtags: [], statuses: [], collections: [] }
+    { accounts: [], hashtags: [], statuses: [] }
   end
 end

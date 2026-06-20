@@ -5,8 +5,6 @@ class Trends::PreviewCardProviderFilter
     status
   ).freeze
 
-  IGNORED_PARAMS = %w(page).freeze
-
   attr_reader :params
 
   def initialize(params)
@@ -17,7 +15,7 @@ class Trends::PreviewCardProviderFilter
     scope = PreviewCardProvider.unscoped
 
     params.each do |key, value|
-      next if IGNORED_PARAMS.include?(key.to_s)
+      next if key.to_s == 'page'
 
       scope.merge!(scope_for(key, value.to_s.strip)) if value.present?
     end

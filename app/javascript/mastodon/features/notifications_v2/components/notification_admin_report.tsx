@@ -106,10 +106,10 @@ export const NotificationAdminReport: React.FC<{
 
       <div className='notification-group__main'>
         <div className='notification-group__main__header'>
-          <h2 className='notification-group__main__header__label'>
+          <div className='notification-group__main__header__label'>
             {message}
             <RelativeTimestamp timestamp={report.created_at} />
-          </h2>
+          </div>
         </div>
 
         {report.comment.length > 0 && (

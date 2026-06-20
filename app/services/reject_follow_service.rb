@@ -17,6 +17,6 @@ class RejectFollowService < BaseService
   end
 
   def build_json(follow_request)
-    serialize_payload(follow_request, ActivityPub::RejectFollowSerializer).to_json
+    Oj.dump(serialize_payload(follow_request, ActivityPub::RejectFollowSerializer))
   end
 end

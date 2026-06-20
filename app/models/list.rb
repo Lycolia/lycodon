@@ -5,19 +5,18 @@
 # Table name: lists
 #
 #  id             :bigint(8)        not null, primary key
-#  exclusive      :boolean          default(FALSE), not null
-#  replies_policy :integer          default("list"), not null
+#  account_id     :bigint(8)        not null
 #  title          :string           default(""), not null
 #  created_at     :datetime         not null
 #  updated_at     :datetime         not null
-#  account_id     :bigint(8)        not null
+#  replies_policy :integer          default("list"), not null
+#  exclusive      :boolean          default(FALSE), not null
 #
 
 class List < ApplicationRecord
   include Paginable
 
   PER_ACCOUNT_LIMIT = 50
-  TITLE_LENGTH_LIMIT = 256
 
   enum :replies_policy, { list: 0, followed: 1, none: 2 }, prefix: :show, validate: true
 
@@ -27,7 +26,7 @@ class List < ApplicationRecord
   has_many :accounts, through: :list_accounts
   has_many :active_accounts, -> { merge(ListAccount.active) }, through: :list_accounts, source: :account
 
-  validates :title, presence: true, length: { maximum: TITLE_LENGTH_LIMIT }
+  validates :title, presence: true
 
   validate :validate_account_lists_limit, on: :create
 

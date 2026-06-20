@@ -2130,6 +2130,11 @@ div[aria-label$='shillest.net'] img[alt^=':stamp'] {
     line-height: 16px;
     padding: 4px 8px;
 
+    &.active {
+      color: $white;
+      background: $ui-highlight-color;
+    }
+
     &__popout {
       background: var(--dropdown-background-color);
       backdrop-filter: $backdrop-blur-filter;
@@ -8537,7 +8542,7 @@ noscript {
     gap: 8px;
 
     $button-breakpoint: 420px;
-    $button-fallback-breakpoint: 475px;
+    $button-fallback-breakpoint: #{$button-breakpoint} + 55px;
 
     &--desktop {
       margin-top: 55px;
@@ -8561,7 +8566,7 @@ noscript {
       }
 
       @supports (not (container-type: inline-size)) {
-        @media (min-width: 476px) {
+        @media (min-width: (#{$button-fallback-breakpoint} + 1px)) {
           display: none;
         }
       }
@@ -9001,7 +9006,7 @@ noscript {
   position: relative;
   overflow: hidden;
 
-  @media screen and (max-width: 424px) {
+  @media screen and (max-width: (124px + 300px)) {
     width: 100%;
   }
 
@@ -9016,7 +9021,7 @@ noscript {
     width: 124px;
     flex: 0 0 auto;
 
-    @media screen and (max-width: 424px) {
+    @media screen and (max-width: (124px + 300px)) {
       display: none;
     }
   }

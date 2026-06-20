@@ -43,13 +43,13 @@ export function createLimitedCache<CacheValue, CacheKey = string>({
         cacheMap.delete(lastKey);
         cacheKeys.delete(lastKey);
         log(
-          'Added %o and deleted %o from cache, now size %d',
+          'Added %s and deleted %s from cache, now size %d',
           key,
           lastKey,
           cacheMap.size,
         );
       } else {
-        log('Added %o to cache, now size %d', key, cacheMap.size);
+        log('Added %s to cache, now size %d', key, cacheMap.size);
       }
     },
     clear: () => {

@@ -8,7 +8,6 @@ class REST::NotificationPolicySerializer < ActiveModel::Serializer
              :for_new_accounts,
              :for_private_mentions,
              :for_limited_accounts,
-             :for_bots,
              :summary
 
   def summary

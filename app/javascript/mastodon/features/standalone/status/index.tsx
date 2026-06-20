@@ -8,7 +8,6 @@ import { Provider } from 'react-redux';
 
 import { fetchStatus, toggleStatusSpoilers } from 'mastodon/actions/statuses';
 import { hydrateStore } from 'mastodon/actions/store';
-import { FocusTargetProvider } from 'mastodon/components/navigation_focus_target';
 import { Router } from 'mastodon/components/router';
 import { DetailedStatus } from 'mastodon/features/status/components/detailed_status';
 import { useRenderSignal } from 'mastodon/hooks/useRenderSignal';
@@ -80,9 +79,7 @@ export const Status: React.FC<{ id: string }> = ({ id }) => {
     <IntlProvider>
       <Provider store={store}>
         <Router>
-          <FocusTargetProvider>
-            <Embed id={id} />
-          </FocusTargetProvider>
+          <Embed id={id} />
         </Router>
       </Provider>
     </IntlProvider>

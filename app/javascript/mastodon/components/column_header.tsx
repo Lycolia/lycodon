@@ -16,10 +16,6 @@ import { Icon } from 'mastodon/components/icon';
 import { ButtonInTabsBar } from 'mastodon/features/ui/util/columns_context';
 import { useIdentity } from 'mastodon/identity_context';
 
-import { useColumnIndexContext } from '../features/ui/components/columns_area';
-import { getColumnSkipLinkId } from '../features/ui/components/skip_links';
-
-import { NavigationFocusTarget } from './navigation_focus_target';
 import { useAppHistory } from './router';
 
 export const messages = defineMessages({
@@ -37,11 +33,10 @@ export const messages = defineMessages({
 });
 
 const BackButton: React.FC<{
-  hasTitle: boolean;
-}> = ({ hasTitle }) => {
+  onlyIcon: boolean;
+}> = ({ onlyIcon }) => {
   const history = useAppHistory();
   const intl = useIntl();
-  const columnIndex = useColumnIndexContext();
 
   const handleBackClick = useCallback(() => {
     if (history.location.state?.fromMastodon) {
@@ -55,18 +50,16 @@ const BackButton: React.FC<{
     <button
       onClick={handleBackClick}
       className={classNames('column-header__back-button', {
-        compact: hasTitle,
+        compact: onlyIcon,
       })}
-      id={!hasTitle ? getColumnSkipLinkId(columnIndex) : undefined}
       aria-label={intl.formatMessage(messages.back)}
-      type='button'
     >
       <Icon
         id='chevron-left'
         icon={ArrowBackIcon}
         className='column-back-button__icon'
       />
-      {!hasTitle && (
+      {!onlyIcon && (
         <FormattedMessage id='column_back_button.label' defaultMessage='Back' />
       )}
     </button>
@@ -74,12 +67,11 @@ const BackButton: React.FC<{
 };
 
 export interface Props {
-  title?: React.ReactNode;
+  title?: string;
   icon?: string;
   iconComponent?: IconProp;
   active?: boolean;
   children?: React.ReactNode;
-  className?: string;
   pinned?: boolean;
   multiColumn?: boolean;
   extraButton?: React.ReactNode;
@@ -98,7 +90,6 @@ export const ColumnHeader: React.FC<Props> = ({
   iconComponent,
   active,
   children,
-  className,
   pinned,
   multiColumn,
   extraButton,
@@ -149,11 +140,11 @@ export const ColumnHeader: React.FC<Props> = ({
     onPin?.();
   }, [history, pinned, onPin]);
 
-  const wrapperClassName = classNames('column-header__wrapper', className, {
+  const wrapperClassName = classNames('column-header__wrapper', {
     active,
   });
 
-  const headingClassName = classNames('column-header', {
+  const buttonClassName = classNames('column-header', {
     active,
   });
 
@@ -181,7 +172,6 @@ export const ColumnHeader: React.FC<Props> = ({
       <button
         className='text-btn column-header__setting-btn'
         onClick={handlePin}
-        type='button'
       >
         <Icon id='times' icon={CloseIcon} />{' '}
         <FormattedMessage id='column_header.unpin' defaultMessage='Unpin' />
@@ -195,7 +185,6 @@ export const ColumnHeader: React.FC<Props> = ({
           aria-label={intl.formatMessage(messages.moveLeft)}
           className='icon-button column-header__setting-btn'
           onClick={handleMoveLeft}
-          type='button'
         >
           <Icon id='chevron-left' icon={ChevronLeftIcon} />
         </button>
@@ -204,7 +193,6 @@ export const ColumnHeader: React.FC<Props> = ({
           aria-label={intl.formatMessage(messages.moveRight)}
           className='icon-button column-header__setting-btn'
           onClick={handleMoveRight}
-          type='button'
         >
           <Icon id='chevron-right' icon={ChevronRightIcon} />
         </button>
@@ -215,7 +203,6 @@ export const ColumnHeader: React.FC<Props> = ({
       <button
         className='text-btn column-header__setting-btn'
         onClick={handlePin}
-        type='button'
       >
         <Icon id='plus' icon={AddIcon} />{' '}
         <FormattedMessage id='column_header.pin' defaultMessage='Pin' />
@@ -227,7 +214,7 @@ export const ColumnHeader: React.FC<Props> = ({
     !pinned &&
     ((multiColumn && history.location.state?.fromMastodon) || showBackButton)
   ) {
-    backButton = <BackButton hasTitle={!!title} />;
+    backButton = <BackButton onlyIcon={!!title} />;
   }
 
   const collapsedContent = [extraContent];
@@ -250,7 +237,6 @@ export const ColumnHeader: React.FC<Props> = ({
           collapsed ? messages.show : messages.hide,
         )}
         onClick={handleToggleClick}
-        type='button'
       >
         <i className='icon-with-badge'>
           <Icon
@@ -264,58 +250,35 @@ export const ColumnHeader: React.FC<Props> = ({
   }
 
   const hasIcon = icon && iconComponent;
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-  const hasTitle = (hasIcon || backButton) && title;
-  const columnIndex = useColumnIndexContext();
-
-  const titleContents = (
-    <>
-      {!backButton && hasIcon && (
-        <Icon id={icon} icon={iconComponent} className='column-header__icon' />
-      )}
-      <span className='column-header__text'>{title}</span>
-    </>
-  );
-
-  const titleClassNames = classNames('column-header__title', {
-    'column-header__title--with-back-button': !!backButton,
-  });
+  const hasTitle = hasIcon && title;
 
   const component = (
     <div className={wrapperClassName}>
-      <div className={headingClassName}>
-        {backButton}
+      <h1 className={buttonClassName}>
         {hasTitle && (
-          <NavigationFocusTarget
-            as='h1'
-            className='column-header__title-wrapper'
-          >
-            {onClick ? (
-              <button
-                onClick={handleTitleClick}
-                className={titleClassNames}
-                type='button'
-                id={getColumnSkipLinkId(columnIndex)}
-              >
-                {titleContents}
-              </button>
-            ) : (
-              <span
-                className={titleClassNames}
-                tabIndex={-1}
-                id={getColumnSkipLinkId(columnIndex)}
-              >
-                {titleContents}
-              </span>
-            )}
-          </NavigationFocusTarget>
+          <>
+            {backButton}
+
+            <button onClick={handleTitleClick} className='column-header__title'>
+              {!backButton && (
+                <Icon
+                  id={icon}
+                  icon={iconComponent}
+                  className='column-header__icon'
+                />
+              )}
+              {title}
+            </button>
+          </>
         )}
+
+        {!hasTitle && backButton}
 
         <div className='column-header__buttons'>
           {extraButton}
           {collapseButton}
         </div>
-      </div>
+      </h1>
 
       <div
         className={collapsibleClassName}

@@ -65,7 +65,7 @@ class VoteService < BaseService
   end
 
   def build_json(vote)
-    serialize_payload(vote, ActivityPub::VoteSerializer).to_json
+    Oj.dump(serialize_payload(vote, ActivityPub::VoteSerializer))
   end
 
   def increment_voters_count!

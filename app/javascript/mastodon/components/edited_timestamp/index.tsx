@@ -60,7 +60,10 @@ export const EditedTimestamp: React.FC<{
   const renderItem = useCallback(
     (item: HistoryItem, index: number, onClick: React.MouseEventHandler) => {
       const formattedDate = (
-        <RelativeTimestamp timestamp={item.get('created_at') as string} long />
+        <RelativeTimestamp
+          timestamp={item.get('created_at') as string}
+          short={false}
+        />
       );
       const formattedName = (
         <InlineAccount accountId={item.get('account') as string} />
@@ -71,14 +74,12 @@ export const EditedTimestamp: React.FC<{
           id='status.history.created'
           defaultMessage='{name} created {date}'
           values={{ name: formattedName, date: formattedDate }}
-          tagName='span'
         />
       ) : (
         <FormattedMessage
           id='status.history.edited'
           defaultMessage='{name} edited {date}'
           values={{ name: formattedName, date: formattedDate }}
-          tagName='span'
         />
       );
 
@@ -107,7 +108,7 @@ export const EditedTimestamp: React.FC<{
       onItemClick={handleItemClick}
       forceDropdown
     >
-      <button className='dropdown-menu__text-button' type='button'>
+      <button className='dropdown-menu__text-button'>
         <FormattedMessage
           id='status.edited'
           defaultMessage='Edited {date}'
@@ -123,7 +124,6 @@ export const EditedTimestamp: React.FC<{
               />
             ),
           }}
-          tagName='span'
         />
       </button>
     </Dropdown>

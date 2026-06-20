@@ -41,20 +41,21 @@ export interface ApiPreviewCardJSON {
   url: string;
   title: string;
   description: string;
-  language: string | null;
-  type: 'video' | 'link';
+  language: string;
+  type: string;
   author_name: string;
   author_url: string;
+  author_account?: ApiAccountJSON;
   provider_name: string;
   provider_url: string;
   html: string;
   width: number;
   height: number;
-  image: string | null;
+  image: string;
   image_description: string;
   embed_url: string;
   blurhash: string;
-  published_at: string | null;
+  published_at: string;
   authors: ApiPreviewCardAuthorJSON[];
 }
 

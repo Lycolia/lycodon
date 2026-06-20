@@ -1,4 +1,3 @@
-import type { ApiAnnualReportState } from './api/annual_report';
 import type { ApiAccountJSON } from './api_types/accounts';
 
 type InitialStateLanguage = [code: string, name: string, localName: string];
@@ -44,45 +43,26 @@ interface InitialStateMeta {
   use_blurhash: boolean;
   use_pending_items?: boolean;
   version: string;
-  custom_version?: string;
-  custom_source_url?: string;
   sso_redirect: string;
   status_page_url: string;
   terms_of_service_enabled: boolean;
   emoji_style?: string;
-  wrapstodon?: InitialStateWrapstodon | null;
 }
 
-interface IntialStateRole {
+interface Role {
   id: string;
   name: string;
   permissions: string;
   color: string;
   highlighted: boolean;
-  collection_limit: number;
-}
-
-interface InitialStateWrapstodon {
-  year: number;
-  state: ApiAnnualReportState;
-}
-
-interface InitialStateCompose {
-  text: string;
-  default_privacy?: string;
-  default_sensitive?: boolean;
-  default_language?: string;
-  default_quote_policy?: string;
-  me?: string;
 }
 
 export interface InitialState {
   accounts: Record<string, ApiAccountJSON>;
   languages: InitialStateLanguage[];
-  compose: InitialStateCompose;
   critical_updates_pending?: boolean;
   meta: InitialStateMeta;
-  role?: IntialStateRole;
+  role?: Role;
   features: string[];
 }
 
@@ -144,13 +124,10 @@ export const landingPage = getMeta('landing_page');
 export const useBlurhash = getMeta('use_blurhash');
 export const usePendingItems = getMeta('use_pending_items');
 export const version = getMeta('version');
-export const customVersion = getMeta('custom_version');
-export const customSourceUrl = getMeta('custom_source_url');
 export const criticalUpdatesPending = initialState?.critical_updates_pending;
 export const statusPageUrl = getMeta('status_page_url');
 export const sso_redirect = getMeta('sso_redirect');
 export const termsOfServiceEnabled = getMeta('terms_of_service_enabled');
-export const wrapstodon = getMeta('wrapstodon');
 
 const displayNames =
   // Intl.DisplayNames can be undefined in old browsers
@@ -168,7 +145,7 @@ export const languages = initialState?.languages.map((lang) => {
     lang[0],
     displayNames?.of(lang[0].replace('zh-YUE', 'yue')) ?? lang[1],
     lang[2],
-  ] as InitialStateLanguage;
+  ];
 });
 
 export function getAccessToken(): string | undefined {

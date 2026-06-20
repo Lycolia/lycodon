@@ -3,7 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Filters' do
-  include_context 'with API authentication', oauth_scopes: 'read:filters write:filters'
+  let(:user)    { Fabricate(:user) }
+  let(:scopes)  { 'read:filters write:filters' }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 
   shared_examples 'unauthorized for invalid token' do
     let(:headers) { { 'Authorization' => '' } }
@@ -222,7 +225,7 @@ RSpec.describe 'Filters' do
 
         expect(keyword.reload.keyword).to eq 'updated'
 
-        expect(redis).to have_received(:publish).with("timeline:#{user.account.id}", { event: :filters_changed }.to_json).once
+        expect(redis).to have_received(:publish).with("timeline:#{user.account.id}", Oj.dump(event: :filters_changed)).once
       end
     end
 

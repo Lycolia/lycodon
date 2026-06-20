@@ -2,7 +2,7 @@
 
 class AnnualReport::TopHashtags < AnnualReport::Source
   MINIMUM_TAGGINGS = 1
-  SET_SIZE = 1
+  SET_SIZE = 40
 
   def generate
     {
@@ -13,10 +13,6 @@ class AnnualReport::TopHashtags < AnnualReport::Source
                       }
                     end,
     }
-  end
-
-  def eligible?
-    report_statuses.joins(:tags).exists?
   end
 
   private

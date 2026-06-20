@@ -2,18 +2,15 @@
 
 RSpec.shared_examples 'worker handling fasp delivery failures' do
   context 'when provider is not available' do
-    let(:delivery_last_failed_at) { 1.minute.ago.beginning_of_minute }
-
     before do
-      provider.update(delivery_last_failed_at:)
+      provider.update(delivery_last_failed_at: 1.minute.ago)
       domain = Addressable::URI.parse(provider.base_url).normalized_host
       UnavailableDomain.create!(domain:)
     end
 
-    it 'does not attempt connecting, does not fail the job and does not update the provider' do
+    it 'does not attempt connecting and does not fail the job' do
       expect { subject }.to_not raise_error
       expect(stubbed_request).to_not have_been_made
-      expect(provider.reload.delivery_last_failed_at).to eq delivery_last_failed_at
     end
   end
 

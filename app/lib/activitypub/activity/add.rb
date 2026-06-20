@@ -12,11 +12,6 @@ class ActivityPub::Activity::Add < ActivityPub::Activity
       else
         add_featured
       end
-    when @account.collections_url
-      add_collection
-    else
-      @collection = @account.collections.find_by(uri: value_or_id(@json['target']))
-      add_collection_item if @collection
     end
   end
 
@@ -34,13 +29,5 @@ class ActivityPub::Activity::Add < ActivityPub::Activity
     name = @object['name']&.delete_prefix('#')
 
     FeaturedTag.create!(account: @account, name: name) if name.present?
-  end
-
-  def add_collection
-    ActivityPub::ProcessFeaturedCollectionService.new.call(@account, @object)
-  end
-
-  def add_collection_item
-    ActivityPub::ProcessFeaturedItemService.new.call(@collection, @object)
   end
 end

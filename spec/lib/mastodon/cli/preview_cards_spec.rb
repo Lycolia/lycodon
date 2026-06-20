@@ -26,7 +26,7 @@ RSpec.describe Mastodon::CLI::PreviewCards do
         it 'deletes thumbnails for local preview cards' do
           expect { subject }
             .to output_results(
-              'Removed media from 2 preview cards',
+              'Removed 2 preview cards',
               'approx. 119 KB'
             )
         end
@@ -38,7 +38,7 @@ RSpec.describe Mastodon::CLI::PreviewCards do
         it 'deletes thumbnails for local preview cards' do
           expect { subject }
             .to output_results(
-              'Removed media from 1 link-type preview cards',
+              'Removed 1 link-type preview cards',
               'approx. 59.6 KB'
             )
         end
@@ -50,7 +50,7 @@ RSpec.describe Mastodon::CLI::PreviewCards do
         it 'deletes thumbnails for local preview cards' do
           expect { subject }
             .to output_results(
-              'Removed media from 1 preview cards',
+              'Removed 1 preview cards',
               'approx. 59.6 KB'
             )
         end

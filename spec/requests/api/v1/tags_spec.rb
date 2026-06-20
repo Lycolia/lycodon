@@ -3,7 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Tags' do
-  include_context 'with API authentication', oauth_scopes: 'write:follows'
+  let(:user)    { Fabricate(:user) }
+  let(:scopes)  { 'write:follows' }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 
   describe 'GET /api/v1/tags/:id' do
     subject do

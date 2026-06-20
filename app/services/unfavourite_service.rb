@@ -18,6 +18,6 @@ class UnfavouriteService < BaseService
   end
 
   def build_json(favourite)
-    serialize_payload(favourite, ActivityPub::UndoLikeSerializer).to_json
+    Oj.dump(serialize_payload(favourite, ActivityPub::UndoLikeSerializer))
   end
 end

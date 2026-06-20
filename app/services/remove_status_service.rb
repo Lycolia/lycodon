@@ -14,7 +14,7 @@ class RemoveStatusService < BaseService
   # @option  [Boolean] :original_removed
   # @option  [Boolean] :skip_streaming
   def call(status, **options)
-    @payload  = { event: :delete, payload: status.id.to_s }.to_json
+    @payload  = Oj.dump(event: :delete, payload: status.id.to_s)
     @status   = status
     @account  = status.account
     @options  = options
@@ -103,7 +103,7 @@ class RemoveStatusService < BaseService
   end
 
   def signed_activity_json
-    @signed_activity_json ||= serialize_payload(@status, @status.reblog? ? ActivityPub::UndoAnnounceSerializer : ActivityPub::DeleteNoteSerializer, signer: @account, always_sign: true).to_json
+    @signed_activity_json ||= Oj.dump(serialize_payload(@status, @status.reblog? ? ActivityPub::UndoAnnounceSerializer : ActivityPub::DeleteSerializer, signer: @account, always_sign: true))
   end
 
   def remove_reblogs

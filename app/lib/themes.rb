@@ -16,6 +16,6 @@ class Themes
   end
 
   def names
-    @conf.keys
+    ['system'] + @conf.keys
   end
 end

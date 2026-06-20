@@ -3,7 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Media API', :attachment_processing do
-  include_context 'with API authentication', oauth_scopes: 'write'
+  let(:user)    { Fabricate(:user) }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:scopes)  { 'write' }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 
   describe 'POST /api/v2/media' do
     context 'when small media format attachment is processed immediately' do
@@ -71,7 +74,7 @@ RSpec.describe 'Media API', :attachment_processing do
         allow(user.account).to receive(:media_attachments).and_return(media_attachments)
       end
 
-      context 'when file type cannot be identified' do
+      context 'when imagemagick cannot identify the file type' do
         before do
           allow(media_attachments).to receive(:create!).and_raise(Paperclip::Errors::NotIdentifiedByImageMagickError)
         end

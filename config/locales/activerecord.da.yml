@@ -32,12 +32,6 @@ da:
           attributes:
             url:
               invalid: er ikke en gyldig URL
-        collection:
-          attributes:
-            collection_items:
-              too_many: er for mange, ikke mere end %{count} er tilladt
-            tag:
-              unusable: må ikke anvendes
         doorkeeper/application:
           attributes:
             website:

@@ -24,13 +24,16 @@ RSpec.describe StatusesHelper do
   end
 
   describe '#media_summary' do
-    subject { helper.media_summary(status) }
+    it 'describes the media on a status' do
+      status = Fabricate :status
+      Fabricate :media_attachment, status: status, type: :video
+      Fabricate :media_attachment, status: status, type: :audio
+      Fabricate :media_attachment, status: status, type: :image
 
-    let(:status) { Fabricate.build :status }
+      result = helper.media_summary(status)
 
-    before { %i(video audio image).each { |type| Fabricate.build :media_attachment, status:, type: } }
-
-    it { is_expected.to eq('Attached: 1 image · 1 video · 1 audio') }
+      expect(result).to eq('Attached: 1 image · 1 video · 1 audio')
+    end
   end
 
   describe 'visibility_icon' do

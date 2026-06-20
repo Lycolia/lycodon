@@ -6,10 +6,10 @@
 #
 #  id                 :bigint(8)        not null, primary key
 #  inbox_url          :string           default(""), not null
-#  state              :integer          default("idle"), not null
+#  follow_activity_id :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
-#  follow_activity_id :string
+#  state              :integer          default("idle"), not null
 #
 
 class Relay < ApplicationRecord
@@ -31,7 +31,7 @@ class Relay < ApplicationRecord
 
   def enable!
     activity_id = ActivityPub::TagManager.instance.generate_uri_for(nil)
-    payload     = follow_activity(activity_id).to_json
+    payload     = Oj.dump(follow_activity(activity_id))
 
     update!(state: :pending, follow_activity_id: activity_id)
     reset_delivery_tracker
@@ -40,7 +40,7 @@ class Relay < ApplicationRecord
 
   def disable!
     activity_id = ActivityPub::TagManager.instance.generate_uri_for(nil)
-    payload     = unfollow_activity(activity_id).to_json
+    payload     = Oj.dump(unfollow_activity(activity_id))
 
     update!(state: :idle, follow_activity_id: nil)
     reset_delivery_tracker

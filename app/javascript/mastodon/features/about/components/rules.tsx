@@ -5,10 +5,9 @@ import type { IntlShape } from 'react-intl';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
 import { createSelector } from '@reduxjs/toolkit';
+import type { List as ImmutableList } from 'immutable';
 
-import type { ApiRuleJSON } from '@/mastodon/api_types/instance';
 import type { SelectItem } from '@/mastodon/components/dropdown_selector';
-import { Select } from '@/mastodon/components/form_fields';
 import type { RootState } from '@/mastodon/store';
 import { useAppSelector } from '@/mastodon/store';
 
@@ -105,27 +104,33 @@ export const RulesSection: FC<RulesSectionProps> = ({ isLoading = false }) => {
               defaultMessage='Language'
             />
           </label>
-          <Select
-            onChange={handleLocaleChange}
-            id='language-select'
-            value={selectedLocale}
-          >
+          <select onChange={handleLocaleChange} id='language-select'>
             {localeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
+              <option
+                key={option.value}
+                value={option.value}
+                selected={option.value === selectedLocale}
+              >
                 {option.text}
               </option>
             ))}
-          </Select>
+          </select>
         </div>
       )}
     </Section>
   );
 };
 
-const selectRules = createSelector(
-  [(state: RootState) => state.server.server.item],
-  (item) => item?.rules ?? [],
-);
+const selectRules = (state: RootState) => {
+  const rules = state.server.getIn([
+    'server',
+    'rules',
+  ]) as ImmutableList<Rule> | null;
+  if (!rules) {
+    return [];
+  }
+  return rules.toJS() as Rule[];
+};
 
 const rulesSelector = createSelector(
   [selectRules, (_state, locale: string) => locale],
@@ -138,19 +143,18 @@ const rulesSelector = createSelector(
         return rule;
       }
 
-      const translatedRule: ApiRuleJSON = { ...rule };
       const partialLocale = locale.split('-')[0];
       if (partialLocale && translations[partialLocale]) {
-        translatedRule.text = translations[partialLocale].text;
-        translatedRule.hint = translations[partialLocale].hint;
+        rule.text = translations[partialLocale].text;
+        rule.hint = translations[partialLocale].hint;
       }
 
       if (translations[locale]) {
-        translatedRule.text = translations[locale].text;
-        translatedRule.hint = translations[locale].hint;
+        rule.text = translations[locale].text;
+        rule.hint = translations[locale].hint;
       }
 
-      return translatedRule;
+      return rule;
     });
   },
 );

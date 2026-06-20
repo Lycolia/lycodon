@@ -3,7 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Favourites' do
-  include_context 'with API authentication', oauth_scopes: 'read:favourites'
+  let(:user)    { Fabricate(:user) }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:scopes)  { 'read:favourites' }
+  let(:headers) { { Authorization: "Bearer #{token.token}" } }
 
   describe 'GET /api/v1/favourites' do
     subject do

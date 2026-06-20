@@ -76,11 +76,6 @@ export const Carousel = <
   // Handle slide change
   const [slideIndex, setSlideIndex] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  // Handle slide heights
-  const [currentSlideHeight, setCurrentSlideHeight] = useState(
-    () => wrapperRef.current?.scrollHeight ?? 0,
-  );
-  const previousSlideHeight = usePrevious(currentSlideHeight);
   const handleSlideChange = useCallback(
     (direction: number) => {
       setSlideIndex((prev) => {
@@ -106,11 +101,16 @@ export const Carousel = <
     [items.length, onChangeSlide],
   );
 
-  const observerRef = useRef<ResizeObserver | null>(null);
-  observerRef.current ??= new ResizeObserver(() => {
-    handleSlideChange(0);
-  });
-
+  // Handle slide heights
+  const [currentSlideHeight, setCurrentSlideHeight] = useState(
+    wrapperRef.current?.scrollHeight ?? 0,
+  );
+  const previousSlideHeight = usePrevious(currentSlideHeight);
+  const observerRef = useRef<ResizeObserver>(
+    new ResizeObserver(() => {
+      handleSlideChange(0);
+    }),
+  );
   const wrapperStyles = useSpring({
     x: `-${slideIndex * 100}%`,
     height: currentSlideHeight,
@@ -200,7 +200,7 @@ export const Carousel = <
 };
 
 type CarouselSlideWrapperProps<SlideProps extends CarouselSlideProps> = {
-  observer: ResizeObserver | null;
+  observer: ResizeObserver;
   className: string;
   active: boolean;
   item: SlideProps;
@@ -217,7 +217,7 @@ const CarouselSlideWrapper = <SlideProps extends CarouselSlideProps>({
 }: CarouselSlideWrapperProps<SlideProps>) => {
   const handleRef = useCallback(
     (instance: HTMLDivElement | null) => {
-      if (observer && instance) {
+      if (instance) {
         observer.observe(instance);
       }
     },

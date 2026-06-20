@@ -1,15 +1,13 @@
 import PropTypes from 'prop-types';
 import { PureComponent } from 'react';
 
-import { defineMessages, FormattedMessage } from 'react-intl';
+import { defineMessages, injectIntl, FormattedMessage } from 'react-intl';
 
 import ImmutablePropTypes from 'react-immutable-proptypes';
 
 import { NonceProvider } from 'react-select';
 import AsyncSelect from 'react-select/async';
-
-import { Toggle } from '@/mastodon/components/form_fields/toggle_field';
-import { injectIntl } from '@/mastodon/components/intl';
+import Toggle from 'react-toggle';
 
 import SettingToggle from '../../notifications/components/setting_toggle';
 

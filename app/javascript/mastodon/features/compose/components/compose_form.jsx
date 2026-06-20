@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { createRef } from 'react';
 
-import { defineMessages } from 'react-intl';
+import { defineMessages, injectIntl } from 'react-intl';
 
 import classNames from 'classnames';
 
@@ -15,7 +15,6 @@ import { missingAltTextModal } from 'mastodon/initial_state';
 import AutosuggestInput from 'mastodon/components/autosuggest_input';
 import AutosuggestTextarea from 'mastodon/components/autosuggest_textarea';
 import { Button } from 'mastodon/components/button';
-import { injectIntl } from '@/mastodon/components/intl';
 import EmojiPickerDropdown from '../containers/emoji_picker_dropdown_container';
 import PollButtonContainer from '../containers/poll_button_container';
 import SpoilerButtonContainer from '../containers/spoiler_button_container';
@@ -65,7 +64,6 @@ class ComposeForm extends ImmutablePureComponent {
     onSuggestionSelected: PropTypes.func.isRequired,
     onChangeSpoilerText: PropTypes.func.isRequired,
     onPaste: PropTypes.func.isRequired,
-    onDrop: PropTypes.func.isRequired,
     onPickEmoji: PropTypes.func.isRequired,
     autoFocus: PropTypes.bool,
     withoutNavigation: PropTypes.bool,
@@ -80,6 +78,10 @@ class ComposeForm extends ImmutablePureComponent {
 
   static defaultProps = {
     autoFocus: false,
+  };
+
+  state = {
+    highlighted: false,
   };
 
   constructor(props) {
@@ -216,13 +218,13 @@ class ComposeForm extends ImmutablePureComponent {
       Promise.resolve().then(() => {
         this.textareaRef.current.setSelectionRange(selectionStart, selectionEnd);
         this.textareaRef.current.focus();
+        this.setState({ highlighted: true });
+        this.timeout = setTimeout(() => this.setState({ highlighted: false }), 700);
       }).catch(console.error);
     } else if(prevProps.isSubmitting && !this.props.isSubmitting) {
       this.textareaRef.current.focus();
     } else if (this.props.spoiler !== prevProps.spoiler) {
-      const mediaJustAdded = this.props.anyMedia && !prevProps.anyMedia;
-
-      if (this.props.spoiler && !mediaJustAdded) {
+      if (this.props.spoiler) {
         this.spoilerText.input.focus();
       } else if (prevProps.spoiler) {
         this.textareaRef.current.focus();
@@ -247,23 +249,16 @@ class ComposeForm extends ImmutablePureComponent {
   };
 
   render () {
-    const { intl, onPaste, onDrop, autoFocus, withoutNavigation, maxChars, isSubmitting } = this.props;
+    const { intl, onPaste, autoFocus, withoutNavigation, maxChars, isSubmitting } = this.props;
+    const { highlighted } = this.state;
 
     return (
-      <form
-        className='compose-form'
-        role='region'
-        aria-label={intl.formatMessage({
-          id: 'tabs_bar.publish',
-          defaultMessage: 'New Post'
-        })}
-        onSubmit={this.handleSubmit}
-      >
+      <form className='compose-form' onSubmit={this.handleSubmit}>
         <ReplyIndicator />
         {!withoutNavigation && <NavigationBar />}
         <Warning />
 
-        <div className='compose-form__highlightable' ref={this.setRef}>
+        <div className={classNames('compose-form__highlightable', { active: highlighted })} ref={this.setRef}>
           <EditIndicator />
 
           <div className='compose-form__dropdowns'>
@@ -310,14 +305,13 @@ class ComposeForm extends ImmutablePureComponent {
             onSuggestionsClearRequested={this.onSuggestionsClearRequested}
             onSuggestionSelected={this.onSuggestionSelected}
             onPaste={onPaste}
-            onDrop={onDrop}
             autoFocus={autoFocus}
             lang={this.props.lang}
             className='compose-form__input'
           />
 
-          <PollForm />
           <UploadForm />
+          <PollForm />
           <ComposeQuotedStatus />
 
           <div className='compose-form__footer'>

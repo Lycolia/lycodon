@@ -3,7 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Followed tags' do
-  include_context 'with API authentication', oauth_scopes: 'read:follows'
+  let(:user)    { Fabricate(:user) }
+  let(:scopes)  { 'read:follows' }
+  let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
+  let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 
   describe 'GET /api/v1/followed_tags' do
     subject do

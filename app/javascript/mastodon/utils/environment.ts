@@ -12,21 +12,8 @@ export function isProduction() {
   else return import.meta.env.PROD;
 }
 
-export type ServerFeatures = 'fasp';
+export type Features = 'fasp' | 'http_message_signatures';
 
-export function isServerFeatureEnabled(feature: ServerFeatures) {
+export function isFeatureEnabled(feature: Features) {
   return initialState?.features.includes(feature) ?? false;
-}
-
-type ClientFeatures = never;
-
-export function isClientFeatureEnabled(feature: ClientFeatures) {
-  try {
-    const features =
-      window.localStorage.getItem('experiments')?.split(',') ?? [];
-    return features.includes(feature);
-  } catch (err) {
-    console.warn('Could not access localStorage to get client features', err);
-    return false;
-  }
 }

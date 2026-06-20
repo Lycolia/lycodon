@@ -13,8 +13,6 @@ class ActivityPub::Activity::Update < ActivityPub::Activity
       update_account
     elsif supported_object_type? || converted_object_type?
       update_status
-    elsif equals_or_includes_any?(@object['type'], ['FeaturedCollection'])
-      update_collection
     end
   end
 
@@ -32,8 +30,7 @@ class ActivityPub::Activity::Update < ActivityPub::Activity
     @status = Status.find_by(uri: object_uri, account_id: @account.id)
 
     # Ignore updates for old unknown objects, since those are updates we are not interested in
-    # Also ignore unknown objects from suspended users for the same reasons
-    return if @status.nil? && (@account.suspended? || object_too_old?)
+    return if @status.nil? && object_too_old?
 
     # We may be getting `Create` and `Update` out of order
     @status ||= ActivityPub::Activity::Create.new(@json, @account, **@options).perform
@@ -41,12 +38,6 @@ class ActivityPub::Activity::Update < ActivityPub::Activity
     return if @status.nil?
 
     ActivityPub::ProcessStatusUpdateService.new.call(@status, @json, @object, request_id: @options[:request_id])
-  end
-
-  def update_collection
-    return reject_payload! if non_matching_uri_hosts?(@account.uri, object_uri)
-
-    ActivityPub::ProcessFeaturedCollectionService.new.call(@account, @object)
   end
 
   def object_too_old?

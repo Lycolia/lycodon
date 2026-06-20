@@ -100,8 +100,8 @@ RSpec.describe 'ActivityPub Replies' do
               first: be_a(Hash).and(
                 include(
                   items: be_an(Array)
-                    .and(have_attributes(size: 1))
-                    .and(all(satisfy { |item| targets_public_collection?(item) }))
+                  .and(have_attributes(size: 1))
+                  .and(all(satisfy { |item| targets_public_collection?(item) }))
                 )
               )
             )
@@ -252,13 +252,13 @@ RSpec.describe 'ActivityPub Replies' do
   def inlined_replies
     response
       .parsed_body[:first][:items]
-      .grep(Hash)
+      .select { |x| x.is_a?(Hash) }
   end
 
   def remote_replies
     response
       .parsed_body[:first][:items]
-      .grep_v(Hash)
+      .reject { |x| x.is_a?(Hash) }
   end
 
   def parsed_uri_query_values(uri)

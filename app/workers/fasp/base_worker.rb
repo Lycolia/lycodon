@@ -8,14 +8,12 @@ class Fasp::BaseWorker
   private
 
   def with_provider(provider)
-    return unless provider.confirmed? && provider.available?
+    return unless provider.available?
 
-    begin
-      yield
-    rescue *Mastodon::HTTP_CONNECTION_ERRORS
-      raise if provider.available?
-    ensure
-      provider.update_availability!
-    end
+    yield
+  rescue *Mastodon::HTTP_CONNECTION_ERRORS
+    raise if provider.available?
+  ensure
+    provider.update_availability!
   end
 end

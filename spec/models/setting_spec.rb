@@ -36,12 +36,14 @@ RSpec.describe Setting do
 
       context 'when the setting has been saved to database' do
         it 'returns the value from database' do
-          notifications = capture_notifications('sql.active_record') do
+          callback = double
+          allow(callback).to receive(:call)
+
+          ActiveSupport::Notifications.subscribed callback, 'sql.active_record' do
             expect(described_class[key]).to eq 42
           end
 
-          expect(notifications.size).to eq(1)
-          expect(notifications.first.payload[:name]).to eq('Setting Load')
+          expect(callback).to have_received(:call)
         end
       end
 
@@ -60,11 +62,12 @@ RSpec.describe Setting do
       end
 
       it 'does not query the database' do
-        notifications = capture_notifications('sql.active_record') do
+        callback = double
+        allow(callback).to receive(:call)
+        ActiveSupport::Notifications.subscribed callback, 'sql.active_record' do
           described_class[key]
         end
-
-        expect(notifications).to be_empty
+        expect(callback).to_not have_received(:call)
       end
 
       it 'returns the cached value' do

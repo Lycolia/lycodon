@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { defineMessages, useIntl } from 'react-intl';
 
-import { List as ImmutableList } from 'immutable';
+import { Helmet } from 'react-helmet';
 
-import { Helmet } from '@unhead/react/helmet';
+import { List as ImmutableList } from 'immutable';
 
 import PeopleIcon from '@/material-icons/400-24px/group.svg?react';
 import {
@@ -82,9 +82,6 @@ export const Directory: React.FC<{
   const isLoading = useAppSelector(
     (state) =>
       state.user_lists.getIn(['directory', 'isLoading'], true) as boolean,
-  );
-  const hasMore = useAppSelector(
-    (state) => !!state.user_lists.getIn(['directory', 'next']),
   );
 
   useEffect(() => {
@@ -185,7 +182,7 @@ export const Directory: React.FC<{
 
       <LoadMore
         onClick={handleLoadMore}
-        visible={!initialLoad && hasMore}
+        visible={!initialLoad}
         loading={isLoading}
       />
     </div>

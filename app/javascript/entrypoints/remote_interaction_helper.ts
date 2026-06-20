@@ -39,65 +39,18 @@ const findLink = (rel: string, data: unknown): JRDLink | undefined => {
   }
 };
 
-const intentParams = (intent: string): [string, string] | null => {
-  switch (intent) {
-    case 'follow':
-      return ['https://w3id.org/fep/3b86/Follow', 'object'];
-    case 'reblog':
-      return ['https://w3id.org/fep/3b86/Announce', 'object'];
-    case 'favourite':
-      return ['https://w3id.org/fep/3b86/Like', 'object'];
-    case 'vote':
-    case 'reply':
-      return ['https://w3id.org/fep/3b86/Object', 'object'];
-    default:
-      return null;
-  }
-};
-
-const findTemplateLink = (
-  data: unknown,
-  intent: string,
-): [string, string] | [null, null] => {
-  // Find the FEP-3b86 handler for the specific intent
-  const [needle, param] = intentParams(intent) ?? [
-    'http://ostatus.org/schema/1.0/subscribe',
-    'uri',
-  ];
-
-  const match = findLink(needle, data);
-
-  if (match?.template) {
-    return [match.template, param];
-  }
-
-  // If the specific intent wasn't found, try the FEP-3b86 handler for the `Object` intent
-  let fallback = findLink('https://w3id.org/fep/3b86/Object', data);
-  if (fallback?.template) {
-    return [fallback.template, 'object'];
-  }
-
-  // If it's still not found, try the legacy OStatus subscribe handler
-  fallback = findLink('http://ostatus.org/schema/1.0/subscribe', data);
-
-  if (fallback?.template) {
-    return [fallback.template, 'uri'];
-  }
-
-  return [null, null];
-};
+const findTemplateLink = (data: unknown) =>
+  findLink('http://ostatus.org/schema/1.0/subscribe', data)?.template;
 
 const fetchInteractionURLSuccess = (
   uri_or_domain: string,
   template: string,
-  param: string,
 ) => {
   window.parent.postMessage(
     {
       type: 'fetchInteractionURL-success',
       uri_or_domain,
       template,
-      param,
     },
     window.origin,
   );
@@ -121,7 +74,7 @@ const isValidDomain = (value: unknown) => {
 };
 
 // Attempt to find a remote interaction URL from a domain
-const fromDomain = (domain: string, intent: string) => {
+const fromDomain = (domain: string) => {
   const fallbackTemplate = `https://${domain}/authorize_interaction?uri={uri}`;
 
   axios
@@ -129,21 +82,17 @@ const fromDomain = (domain: string, intent: string) => {
       params: { resource: `https://${domain}` },
     })
     .then(({ data }) => {
-      const [template, param] = findTemplateLink(data, intent);
-      fetchInteractionURLSuccess(
-        domain,
-        template ?? fallbackTemplate,
-        param ?? 'uri',
-      );
+      const template = findTemplateLink(data);
+      fetchInteractionURLSuccess(domain, template ?? fallbackTemplate);
       return;
     })
     .catch(() => {
-      fetchInteractionURLSuccess(domain, fallbackTemplate, 'uri');
+      fetchInteractionURLSuccess(domain, fallbackTemplate);
     });
 };
 
 // Attempt to find a remote interaction URL from an arbitrary URL
-const fromURL = (url: string, intent: string) => {
+const fromURL = (url: string) => {
   const domain = new URL(url).host;
   const fallbackTemplate = `https://${domain}/authorize_interaction?uri={uri}`;
 
@@ -152,21 +101,17 @@ const fromURL = (url: string, intent: string) => {
       params: { resource: url },
     })
     .then(({ data }) => {
-      const [template, param] = findTemplateLink(data, intent);
-      fetchInteractionURLSuccess(
-        url,
-        template ?? fallbackTemplate,
-        param ?? 'uri',
-      );
+      const template = findTemplateLink(data);
+      fetchInteractionURLSuccess(url, template ?? fallbackTemplate);
       return;
     })
     .catch(() => {
-      fromDomain(domain, intent);
+      fromDomain(domain);
     });
 };
 
 // Attempt to find a remote interaction URL from a `user@domain` string
-const fromAcct = (acct: string, intent: string) => {
+const fromAcct = (acct: string) => {
   acct = acct.replace(/^@/, '');
 
   const segments = acct.split('@');
@@ -189,29 +134,25 @@ const fromAcct = (acct: string, intent: string) => {
       params: { resource: `acct:${acct}` },
     })
     .then(({ data }) => {
-      const [template, param] = findTemplateLink(data, intent);
-      fetchInteractionURLSuccess(
-        acct,
-        template ?? fallbackTemplate,
-        param ?? 'uri',
-      );
+      const template = findTemplateLink(data);
+      fetchInteractionURLSuccess(acct, template ?? fallbackTemplate);
       return;
     })
     .catch(() => {
       // TODO: handle host-meta?
-      fromDomain(domain, intent);
+      fromDomain(domain);
     });
 };
 
-const fetchInteractionURL = (uri_or_domain: string, intent: string) => {
+const fetchInteractionURL = (uri_or_domain: string) => {
   if (uri_or_domain === '') {
     fetchInteractionURLFailure();
   } else if (/^https?:\/\//.test(uri_or_domain)) {
-    fromURL(uri_or_domain, intent);
+    fromURL(uri_or_domain);
   } else if (uri_or_domain.includes('@')) {
-    fromAcct(uri_or_domain, intent);
+    fromAcct(uri_or_domain);
   } else {
-    fromDomain(uri_or_domain, intent);
+    fromDomain(uri_or_domain);
   }
 };
 
@@ -231,10 +172,8 @@ window.addEventListener('message', (event: MessageEvent<unknown>) => {
     'type' in event.data &&
     event.data.type === 'fetchInteractionURL' &&
     'uri_or_domain' in event.data &&
-    typeof event.data.uri_or_domain === 'string' &&
-    'intent' in event.data &&
-    typeof event.data.intent === 'string'
+    typeof event.data.uri_or_domain === 'string'
   ) {
-    fetchInteractionURL(event.data.uri_or_domain, event.data.intent);
+    fetchInteractionURL(event.data.uri_or_domain);
   }
 });

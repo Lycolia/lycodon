@@ -12,11 +12,6 @@ import {
   createAppAsyncThunk,
 } from 'mastodon/store/typed_functions';
 
-import {
-  fetchAccountsForCollectionPreview,
-  importFetchedCollections,
-} from '../reducers/slices/collections';
-
 import { fetchRelationships } from './accounts';
 import { importFetchedAccounts, importFetchedStatuses } from './importer';
 
@@ -34,7 +29,7 @@ export const submitSearch = createDataLoadingThunk(
       limit: 11,
     });
   },
-  async (data, { dispatch }) => {
+  (data, { dispatch }) => {
     if (data.accounts.length > 0) {
       dispatch(importFetchedAccounts(data.accounts));
       dispatch(fetchRelationships(data.accounts.map((account) => account.id)));
@@ -42,11 +37,6 @@ export const submitSearch = createDataLoadingThunk(
 
     if (data.statuses.length > 0) {
       dispatch(importFetchedStatuses(data.statuses));
-    }
-
-    if (data.collections.length > 0) {
-      dispatch(importFetchedCollections(data.collections));
-      await fetchAccountsForCollectionPreview(data.collections, dispatch);
     }
 
     return data;
@@ -70,7 +60,7 @@ export const expandSearch = createDataLoadingThunk(
       offset,
     });
   },
-  async (data, { dispatch }) => {
+  (data, { dispatch }) => {
     if (data.accounts.length > 0) {
       dispatch(importFetchedAccounts(data.accounts));
       dispatch(fetchRelationships(data.accounts.map((account) => account.id)));
@@ -78,11 +68,6 @@ export const expandSearch = createDataLoadingThunk(
 
     if (data.statuses.length > 0) {
       dispatch(importFetchedStatuses(data.statuses));
-    }
-
-    if (data.collections.length > 0) {
-      dispatch(importFetchedCollections(data.collections));
-      await fetchAccountsForCollectionPreview(data.collections, dispatch);
     }
 
     return data;
@@ -159,7 +144,7 @@ export const hydrateSearch = createAppAsyncThunk(
   'search/hydrate',
   (_args, { dispatch, getState }) => {
     const me = getState().meta.get('me') as string;
-    const history = searchHistory.get(me);
+    const history = searchHistory.get(me) as RecentSearch[] | null;
 
     if (history !== null) {
       dispatch(updateSearchHistory(history));

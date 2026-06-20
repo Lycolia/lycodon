@@ -49,9 +49,6 @@ export const searchReducer = createReducer(initialState, (builder) => {
       hashtags: state.results
         ? [...state.results.hashtags, ...results.hashtags]
         : results.hashtags,
-      collections: state.results
-        ? [...state.results.collections, ...results.collections]
-        : results.collections,
     };
     state.loading = false;
   });

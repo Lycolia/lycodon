@@ -18,7 +18,7 @@ export const useAudioContext = ({ audioElementRef }: AudioContextOptions) => {
   const gainNodeRef = useRef<GainNode>();
 
   useEffect(() => {
-    if (!audioElementRef.current || typeof AudioContext === 'undefined') {
+    if (!audioElementRef.current) {
       return;
     }
 
@@ -43,17 +43,13 @@ export const useAudioContext = ({ audioElementRef }: AudioContextOptions) => {
   }, [audioElementRef]);
 
   const playAudio = useCallback(() => {
-    if (audioContextRef.current && audioElementRef.current) {
-      void audioElementRef.current.play();
-      void audioContextRef.current.resume();
-    }
+    void audioElementRef.current?.play();
+    void audioContextRef.current?.resume();
   }, [audioElementRef]);
 
   const pauseAudio = useCallback(() => {
-    if (audioContextRef.current && audioElementRef.current) {
-      audioElementRef.current.pause();
-      void audioContextRef.current.suspend();
-    }
+    audioElementRef.current?.pause();
+    void audioContextRef.current?.suspend();
   }, [audioElementRef]);
 
   return {

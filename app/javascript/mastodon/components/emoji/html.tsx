@@ -20,7 +20,18 @@ export interface EmojiHTMLProps {
 }
 
 export const EmojiHTML = polymorphicForwardRef<'div', EmojiHTMLProps>(
-  ({ extraEmojis, htmlString, onElement, onAttribute, ...props }, ref) => {
+  (
+    {
+      extraEmojis,
+      htmlString,
+      as: asProp = 'div', // Rename for syntax highlighting
+      className = '',
+      onElement,
+      onAttribute,
+      ...props
+    },
+    ref,
+  ) => {
     const contents = useMemo(
       () =>
         htmlStringToComponents(htmlString, {
@@ -33,7 +44,12 @@ export const EmojiHTML = polymorphicForwardRef<'div', EmojiHTMLProps>(
 
     return (
       <CustomEmojiProvider emojis={extraEmojis}>
-        <AnimateEmojiProvider {...props} ref={ref}>
+        <AnimateEmojiProvider
+          {...props}
+          as={asProp}
+          className={className}
+          ref={ref}
+        >
           {contents}
         </AnimateEmojiProvider>
       </CustomEmojiProvider>

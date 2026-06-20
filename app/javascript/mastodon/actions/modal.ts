@@ -10,7 +10,6 @@ interface OpenModalPayload {
   modalType: ModalType;
   modalProps: ModalProps;
   previousModalProps?: ModalProps;
-  ignoreFocus?: boolean;
 }
 export const openModal = createAction<OpenModalPayload>('MODAL_OPEN');
 

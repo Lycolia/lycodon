@@ -4,44 +4,29 @@ require 'rails_helper'
 
 RSpec.describe RemoteAccountRefreshWorker do
   let(:worker) { described_class.new }
+  let(:service) { instance_double(ActivityPub::FetchRemoteAccountService, call: true) }
 
   describe '#perform' do
     before { stub_service }
 
     let(:account) { Fabricate(:account, domain: 'host.example') }
 
-    context 'with a working service' do
-      let(:service) { instance_double(ActivityPub::FetchRemoteAccountService, call: true) }
+    it 'sends the status to the service' do
+      worker.perform(account.id)
 
-      it 'sends the status to the service' do
-        worker.perform(account.id)
-
-        expect(service).to have_received(:call).with(account.uri)
-      end
-
-      it 'returns nil for non-existent record' do
-        result = worker.perform(123_123_123)
-
-        expect(result).to be_nil
-      end
-
-      it 'returns nil for a local record' do
-        account = Fabricate :account, domain: nil
-        result = worker.perform(account.id)
-        expect(result).to be_nil
-      end
+      expect(service).to have_received(:call).with(account.uri)
     end
 
-    context 'with a failing service' do
-      let(:service) { instance_double(ActivityPub::FetchRemoteAccountService) }
-      let(:response) { instance_double(HTTP::Response, code: 500) }
+    it 'returns nil for non-existent record' do
+      result = worker.perform(123_123_123)
 
-      before { allow(service).to receive(:call).and_raise(Mastodon::UnexpectedResponseError, response) }
+      expect(result).to be_nil
+    end
 
-      it 'raises error when service fails' do
-        expect { worker.perform(account.id) }
-          .to raise_error(Mastodon::UnexpectedResponseError)
-      end
+    it 'returns nil for a local record' do
+      account = Fabricate :account, domain: nil
+      result = worker.perform(account)
+      expect(result).to be_nil
     end
 
     def stub_service

@@ -2715,9 +2715,6 @@ a.account__display-name {
     max-height: $media-modal-media-max-height;
     width: auto;
     height: auto;
-    outline: 1px solid var(--media-outline-color);
-    outline-offset: -1px;
-    border-radius: 8px;
     touch-action: none;
   }
 
